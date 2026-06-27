@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+  background: #0f0f0f;
+}
+
+.canvas-container {
+  position: relative !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Fabric.js canvas controls */
+.canvas-container canvas {
+  border-radius: 8px;
+}
+
+/* Sidebar animations */
+.sidebar-tab-content {
+  animation: fadeSlideIn 0.2s ease;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Upload drop zone pulse */
+@keyframes dropPulse {
+  0%, 100% { border-color: rgba(139, 92, 246, 0.4); }
+  50% { border-color: rgba(139, 92, 246, 0.9); }
+}
+
+.drop-active {
+  animation: dropPulse 1s ease infinite;
+}
