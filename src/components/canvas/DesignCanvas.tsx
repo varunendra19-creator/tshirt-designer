@@ -6,6 +6,7 @@ import { getTshirtSVG, PRINTABLE_AREA } from "@/lib/tshirtData";
 interface DesignCanvasProps {
   canvasRef: any; shirtStyle: string; shirtColor: string;
   viewSide: "front" | "back"; onSaveHistory: () => void; isReady: boolean;
+  shirtRotation: number; shirtFlipX: boolean; shirtFlipY: boolean; shirtScale: number;
 }
 
 const CANVAS_W = 560;
@@ -13,10 +14,9 @@ const CANVAS_H = 600;
 
 export const DesignCanvas = forwardRef<any, DesignCanvasProps>(({
   canvasRef, shirtStyle, shirtColor, viewSide, onSaveHistory, isReady,
+  shirtRotation, shirtFlipX, shirtFlipY, shirtScale,
 }, ref) => {
-  const prevStyle = useRef("");
-  const prevColor = useRef("");
-  const prevSide = useRef("");
+  const prevProps = useRef({ style:"", color:"", side:"", rotation:0, flipX:false, flipY:false, scale:1 });
 
   const loadShirt = useCallback(async () => {
     const canvas = canvasRef.current;
@@ -28,24 +28,42 @@ export const DesignCanvas = forwardRef<any, DesignCanvasProps>(({
     fabric.loadSVGFromURL(url, (objects: any[], options: any) => {
       URL.revokeObjectURL(url);
       const group = fabric.util.groupSVGElements(objects, options);
-      const scale = Math.min((CANVAS_W * 0.82) / (group.width ?? 280), (CANVAS_H * 0.88) / (group.height ?? 320));
-      group.set({ left: CANVAS_W/2, top: CANVAS_H/2, scaleX: scale, scaleY: scale, originX: "center", originY: "center", selectable: false, evented: false, name: "tshirt", hoverCursor: "default" });
+      const baseScale = Math.min((CANVAS_W * 0.82) / (group.width ?? 280), (CANVAS_H * 0.88) / (group.height ?? 320));
+      const finalScale = baseScale * shirtScale;
+      group.set({
+        left: CANVAS_W/2, top: CANVAS_H/2,
+        scaleX: shirtFlipX ? -finalScale : finalScale,
+        scaleY: shirtFlipY ? -finalScale : finalScale,
+        angle: shirtRotation,
+        originX: "center", originY: "center",
+        selectable: false, evented: false, name: "tshirt", hoverCursor: "default",
+      });
       canvas.getObjects().filter((o: any) => ["tshirt","printable"].includes(o.name)).forEach((o: any) => canvas.remove(o));
       canvas.insertAt(group, 0);
       const area = PRINTABLE_AREA[shirtStyle as keyof typeof PRINTABLE_AREA] || PRINTABLE_AREA.classic;
-      const pw = CANVAS_W * area.w, ph = CANVAS_H * area.h;
-      const px = CANVAS_W * area.x + pw/2, py = CANVAS_H * area.y + ph/2;
-      canvas.insertAt(new fabric.Rect({ left: px, top: py, width: pw, height: ph, originX: "center", originY: "center", fill: "transparent", stroke: "rgba(147,112,219,0.5)", strokeWidth: 1.5, strokeDashArray: [6,5], selectable: false, evented: false, name: "printable" }), 1);
+      const pw = CANVAS_W * area.w * shirtScale;
+      const ph = CANVAS_H * area.h * shirtScale;
+      const px = CANVAS_W * area.x + pw/2;
+      const py = CANVAS_H * area.y + ph/2;
+      canvas.insertAt(new fabric.Rect({
+        left: px, top: py, width: pw, height: ph,
+        originX: "center", originY: "center",
+        fill: "transparent", stroke: "rgba(147,112,219,0.5)",
+        strokeWidth: 1.5, strokeDashArray: [6,5],
+        selectable: false, evented: false, name: "printable",
+        angle: shirtRotation,
+      }), 1);
       canvas.renderAll();
     });
-  }, [canvasRef, shirtStyle, shirtColor, viewSide, isReady]);
+  }, [canvasRef, shirtStyle, shirtColor, viewSide, isReady, shirtRotation, shirtFlipX, shirtFlipY, shirtScale]);
 
   useEffect(() => {
-    if (isReady && (prevStyle.current !== shirtStyle || prevColor.current !== shirtColor || prevSide.current !== viewSide)) {
-      prevStyle.current = shirtStyle; prevColor.current = shirtColor; prevSide.current = viewSide;
+    const p = prevProps.current;
+    if (isReady && (p.style!==shirtStyle||p.color!==shirtColor||p.side!==viewSide||p.rotation!==shirtRotation||p.flipX!==shirtFlipX||p.flipY!==shirtFlipY||p.scale!==shirtScale)) {
+      prevProps.current = { style:shirtStyle, color:shirtColor, side:viewSide, rotation:shirtRotation, flipX:shirtFlipX, flipY:shirtFlipY, scale:shirtScale };
       loadShirt();
     }
-  }, [isReady, shirtStyle, shirtColor, viewSide, loadShirt]);
+  }, [isReady, shirtStyle, shirtColor, viewSide, shirtRotation, shirtFlipX, shirtFlipY, shirtScale, loadShirt]);
 
   const addImage = useCallback(async (file: File) => {
     const canvas = canvasRef.current;
@@ -55,21 +73,21 @@ export const DesignCanvas = forwardRef<any, DesignCanvasProps>(({
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
       const printable = canvas.getObjects().find((o: any) => o.name === "printable");
-      const maxW = printable ? printable.width * 0.85 : 180;
-      const maxH = printable ? printable.height * 0.75 : 180;
+      const maxW = printable ? printable.width*0.85 : 180;
+      const maxH = printable ? printable.height*0.75 : 180;
       const cx = printable ? printable.left : CANVAS_W/2;
       const cy = printable ? printable.top : CANVAS_H/2;
       if (file.type === "image/svg+xml") {
         fabric.loadSVGFromURL(dataUrl, (objects: any[], options: any) => {
           const group = fabric.util.groupSVGElements(objects, options);
           const scale = Math.min(maxW/(group.width??1), maxH/(group.height??1));
-          group.set({ left: cx, top: cy, scaleX: scale, scaleY: scale, originX: "center", originY: "center" });
+          group.set({ left:cx, top:cy, scaleX:scale, scaleY:scale, originX:"center", originY:"center" });
           canvas.add(group); canvas.setActiveObject(group); canvas.renderAll(); onSaveHistory();
         });
       } else {
         fabric.Image.fromURL(dataUrl, (img: any) => {
           const scale = Math.min(maxW/(img.width??1), maxH/(img.height??1));
-          img.set({ left: cx, top: cy, scaleX: scale, scaleY: scale, originX: "center", originY: "center" });
+          img.set({ left:cx, top:cy, scaleX:scale, scaleY:scale, originX:"center", originY:"center" });
           canvas.add(img); canvas.setActiveObject(img); canvas.renderAll(); onSaveHistory();
         });
       }
@@ -77,84 +95,64 @@ export const DesignCanvas = forwardRef<any, DesignCanvasProps>(({
     reader.readAsDataURL(file);
   }, [canvasRef, onSaveHistory]);
 
-  const addText = useCallback(async (options: {
-    content: string; fontFamily: string; fontSize: number; fontWeight: string;
-    fontStyle: string; fill: string; textAlign: string; underline: boolean;
-  }) => {
+  const addText = useCallback(async (options: any) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const { fabric } = await import("fabric");
     const printable = canvas.getObjects().find((o: any) => o.name === "printable");
     const cx = printable ? printable.left : CANVAS_W/2;
     const cy = printable ? printable.top : CANVAS_H/2;
-    const maxW = printable ? printable.width * 0.88 : 220;
-    const normalizedContent = options.content.replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
-    const text = new fabric.Textbox(normalizedContent, {
-      left: cx, top: cy, width: maxW, originX: "center", originY: "center",
-      fontFamily: options.fontFamily, fontSize: options.fontSize, fontWeight: options.fontWeight,
-      fontStyle: options.fontStyle, fill: options.fill, textAlign: options.textAlign as any,
-      underline: options.underline, splitByGrapheme: false,
+    const maxW = printable ? printable.width*0.88 : 220;
+    const content = options.content.replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
+    const text = new fabric.Textbox(content, {
+      left:cx, top:cy, width:maxW, originX:"center", originY:"center",
+      fontFamily:options.fontFamily, fontSize:options.fontSize, fontWeight:options.fontWeight,
+      fontStyle:options.fontStyle, fill:options.fill, textAlign:options.textAlign as any,
+      underline:options.underline, splitByGrapheme:false,
     });
-    const textW = text.getScaledWidth();
-    if (textW > maxW) text.set({ scaleX: maxW/textW, scaleY: maxW/textW });
+    if (text.getScaledWidth()>maxW) { const s=maxW/text.getScaledWidth(); text.set({scaleX:s,scaleY:s}); }
     canvas.add(text); canvas.setActiveObject(text); canvas.renderAll(); onSaveHistory();
   }, [canvasRef, onSaveHistory]);
 
-  const addTemplate = useCallback(async (lines: { text: string; font: string; size: number; color: string; weight: string; style?: string }[]) => {
+  const addTemplate = useCallback(async (lines: any[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const { fabric } = await import("fabric");
     const printable = canvas.getObjects().find((o: any) => o.name === "printable");
     const cx = printable ? printable.left : CANVAS_W/2;
-    const maxW = printable ? printable.width * 0.88 : 220;
-    const maxH = printable ? printable.height * 0.85 : 260;
-    const printableTop = printable ? printable.top - printable.height/2 : CANVAS_H/2 - 130;
-
-    // Remove existing template objects
-    canvas.getObjects().filter((o: any) => o.name === "template").forEach((o: any) => canvas.remove(o));
-
+    const maxW = printable ? printable.width*0.88 : 220;
+    const maxH = printable ? printable.height*0.85 : 260;
+    const printableTop = printable ? printable.top - printable.height/2 : CANVAS_H/2-130;
+    canvas.getObjects().filter((o: any) => o.name==="template").forEach((o: any) => canvas.remove(o));
     const textObjs: any[] = [];
     for (const line of lines) {
       const tb = new fabric.Textbox(line.text, {
-        width: maxW, originX: "center", originY: "top",
-        fontFamily: line.font, fontSize: line.size, fontWeight: line.weight,
-        fontStyle: line.style || "normal", fill: line.color,
-        textAlign: "center", splitByGrapheme: false, name: "template",
+        width:maxW, originX:"center", originY:"top",
+        fontFamily:line.font, fontSize:line.size, fontWeight:line.weight,
+        fontStyle:line.style||"normal", fill:line.color, textAlign:"center",
+        splitByGrapheme:false, name:"template",
       });
-      if (tb.getScaledWidth() > maxW) {
-        const s = maxW / tb.getScaledWidth();
-        tb.set({ scaleX: s, scaleY: s });
-      }
+      if (tb.getScaledWidth()>maxW) { const s=maxW/tb.getScaledWidth(); tb.set({scaleX:s,scaleY:s}); }
       textObjs.push(tb);
     }
-
-    const gap = 8;
-    const heights = textObjs.map(t => t.getScaledHeight());
-    const totalH = heights.reduce((a, b) => a + b, 0) + gap * (textObjs.length - 1);
-    const groupScale = totalH > maxH ? maxH / totalH : 1;
-    let currentY = printableTop + (maxH - totalH * groupScale) / 2;
-
-    textObjs.forEach((tb, i) => {
-      tb.set({
-        left: cx, top: currentY,
-        scaleX: (tb.scaleX ?? 1) * groupScale,
-        scaleY: (tb.scaleY ?? 1) * groupScale,
-        originX: "center", originY: "top",
-      });
-      tb.setCoords();
-      canvas.add(tb);
-      currentY += heights[i] * groupScale + gap * groupScale;
+    const gap=8;
+    const heights=textObjs.map(t=>t.getScaledHeight());
+    const totalH=heights.reduce((a,b)=>a+b,0)+gap*(textObjs.length-1);
+    const groupScale=totalH>maxH?maxH/totalH:1;
+    let currentY=printableTop+(maxH-totalH*groupScale)/2;
+    textObjs.forEach((tb,i)=>{
+      tb.set({ left:cx, top:currentY, scaleX:(tb.scaleX??1)*groupScale, scaleY:(tb.scaleY??1)*groupScale, originX:"center", originY:"top" });
+      tb.setCoords(); canvas.add(tb);
+      currentY+=heights[i]*groupScale+gap*groupScale;
     });
-
-    if (textObjs.length > 0) canvas.setActiveObject(textObjs[0]);
-    canvas.renderAll();
-    onSaveHistory();
+    if (textObjs.length>0) canvas.setActiveObject(textObjs[0]);
+    canvas.renderAll(); onSaveHistory();
   }, [canvasRef, onSaveHistory]);
 
   const clearTemplates = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.getObjects().filter((o: any) => o.name === "template").forEach((o: any) => canvas.remove(o));
+    canvas.getObjects().filter((o: any) => o.name==="template").forEach((o: any) => canvas.remove(o));
     canvas.renderAll();
   }, [canvasRef]);
 
@@ -162,15 +160,14 @@ export const DesignCanvas = forwardRef<any, DesignCanvasProps>(({
 
   return (
     <div className="relative flex items-center justify-center w-full h-full">
-      <div className="absolute inset-0" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`, backgroundSize: "32px 32px" }} />
-      <div className="relative" style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.5)", borderRadius: 12, overflow: "hidden" }}>
-        <canvas id="designCanvas" width={CANVAS_W} height={CANVAS_H} />
+      <div className="absolute inset-0" style={{ backgroundImage:`linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)`, backgroundSize:"32px 32px" }}/>
+      <div className="relative" style={{ boxShadow:"0 0 0 1px rgba(255,255,255,0.06),0 24px 64px rgba(0,0,0,0.5)", borderRadius:12, overflow:"hidden" }}>
+        <canvas id="designCanvas" width={CANVAS_W} height={CANVAS_H}/>
       </div>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full" style={{ background: "rgba(147,112,219,0.15)", border: "0.5px solid rgba(147,112,219,0.4)", color: "rgba(147,112,219,0.9)" }}>
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full" style={{ background:"rgba(147,112,219,0.15)", border:"0.5px solid rgba(147,112,219,0.4)", color:"rgba(147,112,219,0.9)" }}>
         Dashed border = printable area
       </div>
     </div>
   );
 });
-
 DesignCanvas.displayName = "DesignCanvas";
