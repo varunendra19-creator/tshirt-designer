@@ -7,6 +7,7 @@ import { Toolbar } from "@/components/toolbar/Toolbar";
 import { LeftSidebar } from "@/components/sidebar/LeftSidebar";
 import { RightSidebar } from "@/components/sidebar/RightSidebar";
 import { PreviewModal } from "@/components/ui/PreviewModal";
+import { TShirt3DViewer } from "@/components/ui/TShirt3DViewer";
 
 export default function Home() {
   const [shirtStyle, setShirtStyle] = useState("classic");
@@ -14,8 +15,8 @@ export default function Home() {
   const [customColor, setCustomColor] = useState("#FFFFFF");
   const [viewSide, setViewSide] = useState<"front"|"back">("front");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [viewer3DOpen, setViewer3DOpen] = useState(false);
   const [previewDataUrl, setPreviewDataUrl] = useState("");
-
   const [shirtRotation, setShirtRotation] = useState(0);
   const [shirtFlipX, setShirtFlipX] = useState(false);
   const [shirtFlipY, setShirtFlipY] = useState(false);
@@ -31,21 +32,17 @@ export default function Home() {
     }
   }, [canvasRef.isReady]);
 
-  const handleAddImage = useCallback((file: File) => { canvasComponentRef.current?.addImage(file); }, []);
-  const handleAddText = useCallback((opts: any) => { canvasComponentRef.current?.addText(opts); }, []);
-  const handleAddTemplate = useCallback((lines: any[]) => { canvasComponentRef.current?.addTemplate(lines); }, []);
+  const getExport = useCallback(() => canvasRef.exportDesign(2), [canvasRef]);
+  const handleAddImage = useCallback((f: File) => { canvasComponentRef.current?.addImage(f); }, []);
+  const handleAddText = useCallback((o: any) => { canvasComponentRef.current?.addText(o); }, []);
+  const handleAddTemplate = useCallback((l: any[]) => { canvasComponentRef.current?.addTemplate(l); }, []);
   const handleClearTemplates = useCallback(() => { canvasComponentRef.current?.clearTemplates(); }, []);
-  const handlePreview = useCallback(() => { setPreviewDataUrl(canvasRef.exportDesign(2)); setPreviewOpen(true); }, [canvasRef]);
-  const handleSave = useCallback(() => { const a=document.createElement("a"); a.href=canvasRef.exportDesign(2); a.download=`threadcraft-${Date.now()}.png`; a.click(); }, [canvasRef]);
-  const handleBuy = useCallback(() => { setPreviewDataUrl(canvasRef.exportDesign(2)); setPreviewOpen(true); }, [canvasRef]);
+  const handlePreview = useCallback(() => { setPreviewDataUrl(getExport()); setPreviewOpen(true); }, [getExport]);
+  const handle3DPreview = useCallback(() => { setPreviewDataUrl(getExport()); setViewer3DOpen(true); }, [getExport]);
+  const handleSave = useCallback(() => { const a=document.createElement("a"); a.href=getExport(); a.download=`threadcraft-${Date.now()}.png`; a.click(); }, [getExport]);
+  const handleBuy = useCallback(() => { setPreviewDataUrl(getExport()); setPreviewOpen(true); }, [getExport]);
   const handleCheckout = useCallback(() => { setPreviewOpen(false); const a=document.createElement("a"); a.href=previewDataUrl; a.download=`order-${Date.now()}.png`; a.click(); }, [previewDataUrl]);
-
-  const handleShirtReset = useCallback(() => {
-    setShirtRotation(0);
-    setShirtFlipX(false);
-    setShirtFlipY(false);
-    setShirtScale(1);
-  }, []);
+  const handleShirtReset = useCallback(() => { setShirtRotation(0); setShirtFlipX(false); setShirtFlipY(false); setShirtScale(1); }, []);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background:"#0d0d14" }}>
@@ -56,6 +53,7 @@ export default function Home() {
         onZoomOut={() => canvasRef.setZoom(canvasRef.zoom-0.1)}
         onZoomFit={() => canvasRef.setZoom(1)}
         onSave={handleSave} onPreview={handlePreview} onBuy={handleBuy}
+        on3DPreview={handle3DPreview}
         viewSide={viewSide} onToggleView={() => setViewSide(v => v==="front"?"back":"front")}
       />
       <div className="flex flex-1 overflow-hidden">
@@ -69,8 +67,7 @@ export default function Home() {
           onShirtRotation={setShirtRotation}
           onShirtFlipX={() => setShirtFlipX(v => !v)}
           onShirtFlipY={() => setShirtFlipY(v => !v)}
-          onShirtScale={setShirtScale}
-          onShirtReset={handleShirtReset}
+          onShirtScale={setShirtScale} onShirtReset={handleShirtReset}
           customColor={customColor} onCustomColor={setCustomColor}
         />
         <div className="flex-1 overflow-hidden">
@@ -92,11 +89,11 @@ export default function Home() {
           onBringForward={canvasRef.bringForward} onSendBackward={canvasRef.sendBackward}
         />
       </div>
-      <PreviewModal
-        isOpen={previewOpen} onClose={() => setPreviewOpen(false)}
+      <PreviewModal isOpen={previewOpen} onClose={() => setPreviewOpen(false)}
         designDataUrl={previewDataUrl} shirtColor={shirtColor}
-        shirtStyle={shirtStyle} onProceed={handleCheckout}
-      />
+        shirtStyle={shirtStyle} onProceed={handleCheckout}/>
+      <TShirt3DViewer isOpen={viewer3DOpen} onClose={() => setViewer3DOpen(false)}
+        designDataUrl={previewDataUrl} shirtColor={shirtColor} shirtStyle={shirtStyle}/>
     </div>
   );
 }
