@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Tooltip } from "@nextui-org/react";
-import { Undo2, Redo2, ZoomIn, ZoomOut, Maximize2, Download, ShoppingCart, Shirt, Eye, Box } from "lucide-react";
+import { Undo2, Redo2, Download, ShoppingCart, Shirt, Eye, RotateCw } from "lucide-react";
 
 interface ToolbarProps {
   zoom: number; historyPos: number; historyLength: number;
@@ -12,7 +12,7 @@ interface ToolbarProps {
   viewSide: "front" | "back"; onToggleView: () => void;
 }
 
-export function Toolbar({ zoom, historyPos, historyLength, onUndo, onRedo, onZoomIn, onZoomOut, onZoomFit, onSave, onPreview, onBuy, on3DPreview, viewSide, onToggleView }: ToolbarProps) {
+export function Toolbar({ historyPos, historyLength, onUndo, onRedo, onSave, onPreview, onBuy, on3DPreview, viewSide, onToggleView }: ToolbarProps) {
   return (
     <div className="flex items-center gap-1 px-4 h-14 shrink-0 z-50"
       style={{ background:"#0d0d14", borderBottom:"0.5px solid rgba(255,255,255,0.08)" }}>
@@ -30,33 +30,20 @@ export function Toolbar({ zoom, historyPos, historyLength, onUndo, onRedo, onZoo
         <Button isIconOnly size="sm" variant="light" isDisabled={historyPos>=historyLength-1} onPress={onRedo} className="text-gray-400 hover:text-white"><Redo2 size={16}/></Button>
       </Tooltip>
       <div className="w-px h-6 mx-2" style={{ background:"rgba(255,255,255,0.1)" }}/>
-      <Tooltip content="Zoom Out" placement="bottom" className="bg-gray-900 text-white text-xs">
-        <Button isIconOnly size="sm" variant="light" onPress={onZoomOut} className="text-gray-400 hover:text-white"><ZoomOut size={16}/></Button>
-      </Tooltip>
-      <div className="min-w-[56px] text-center text-xs font-medium px-2 py-1 rounded cursor-pointer"
-        style={{ color:"rgba(255,255,255,0.7)", background:"rgba(255,255,255,0.06)" }} onClick={onZoomFit}>
-        {Math.round(zoom*100)}%
-      </div>
-      <Tooltip content="Zoom In" placement="bottom" className="bg-gray-900 text-white text-xs">
-        <Button isIconOnly size="sm" variant="light" onPress={onZoomIn} className="text-gray-400 hover:text-white"><ZoomIn size={16}/></Button>
-      </Tooltip>
-      <Tooltip content="Fit to screen" placement="bottom" className="bg-gray-900 text-white text-xs">
-        <Button isIconOnly size="sm" variant="light" onPress={onZoomFit} className="text-gray-400 hover:text-white"><Maximize2 size={16}/></Button>
-      </Tooltip>
-      <div className="w-px h-6 mx-2" style={{ background:"rgba(255,255,255,0.1)" }}/>
-      <Button size="sm" variant="flat" onPress={onToggleView} className="text-xs font-medium"
+      <Button size="sm" variant="flat" onPress={onToggleView}
+        className="text-xs font-medium"
         style={{ background:"rgba(255,255,255,0.07)", color:"rgba(255,255,255,0.8)", border:"0.5px solid rgba(255,255,255,0.1)" }}>
         {viewSide==="front" ? "Front view" : "Back view"}
       </Button>
-      <div className="flex-1"/>
-      <Tooltip content="3D Preview — see all sides" placement="bottom" className="bg-gray-900 text-white text-xs">
-        <Button size="sm" variant="flat" onPress={on3DPreview} startContent={<Box size={14}/>}
-          className="text-sm mr-1 font-medium"
-          style={{ background:"rgba(124,58,237,0.2)", color:"#c4b5fd", border:"0.5px solid rgba(124,58,237,0.5)" }}>
-          3D View
+      <Tooltip content="Auto-rotate the shirt" placement="bottom" className="bg-gray-900 text-white text-xs">
+        <Button size="sm" variant="flat" onPress={on3DPreview} startContent={<RotateCw size={14}/>}
+          className="text-xs font-medium ml-1"
+          style={{ background:"rgba(124,58,237,0.15)", color:"#c4b5fd", border:"0.5px solid rgba(124,58,237,0.4)" }}>
+          Auto Rotate
         </Button>
       </Tooltip>
-      <Tooltip content="2D Preview" placement="bottom" className="bg-gray-900 text-white text-xs">
+      <div className="flex-1"/>
+      <Tooltip content="Preview design" placement="bottom" className="bg-gray-900 text-white text-xs">
         <Button size="sm" variant="flat" onPress={onPreview} startContent={<Eye size={14}/>}
           className="text-sm mr-1"
           style={{ background:"rgba(255,255,255,0.07)", color:"rgba(255,255,255,0.8)", border:"0.5px solid rgba(255,255,255,0.1)" }}>

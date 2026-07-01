@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { TSHIRT_STYLES, SHIRT_COLORS, FONTS, getTshirtSVG } from "@/lib/tshirtData";
 import { TEMPLATE_DESIGNS, TEMPLATE_CATEGORIES } from "@/lib/templateDesigns";
+import { GarmentPickerModal } from "@/components/ui/GarmentPickerModal";
 import type { SidebarTab } from "@/types";
 
 interface LeftSidebarProps {
@@ -17,10 +18,12 @@ interface LeftSidebarProps {
   onStyleChange: (s: string) => void; onColorChange: (c: string) => void;
   onAddImage: (f: File) => void; onAddText: (o: any) => void;
   onAddTemplate: (lines: any[]) => void; onClearTemplates: () => void;
+  // Shirt transform
   shirtRotation: number; shirtFlipX: boolean; shirtFlipY: boolean; shirtScale: number;
   onShirtRotation: (v: number) => void;
   onShirtFlipX: () => void; onShirtFlipY: () => void;
   onShirtScale: (v: number) => void; onShirtReset: () => void;
+  // Custom color
   customColor: string; onCustomColor: (c: string) => void;
 }
 
@@ -79,6 +82,7 @@ export function LeftSidebar({
   customColor, onCustomColor,
 }: LeftSidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>("products");
+  const [garmentModalOpen, setGarmentModalOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; url: string; file: File }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,8 +110,11 @@ export function LeftSidebar({
     return matchCat && matchSearch;
   });
 
+  const sliderStyle = { WebkitAppearance:"none", appearance:"none", width:"100%", height:"4px", borderRadius:"2px", background:`linear-gradient(to right, #7c3aed ${(shirtRotation/360)*100}%, rgba(255,255,255,0.1) 0%)`, outline:"none" };
+
   return (
     <div className="flex h-full shrink-0" style={{ width:248, background:"#0d0d14", borderRight:"0.5px solid rgba(255,255,255,0.08)" }}>
+      {/* Tab icons */}
       <div className="flex flex-col items-center pt-3 gap-1 shrink-0" style={{ width:56, borderRight:"0.5px solid rgba(255,255,255,0.06)" }}>
         {TABS.map(tab => {
           const Icon = tab.icon; const isActive = activeTab===tab.id;
@@ -124,19 +131,32 @@ export function LeftSidebar({
 
       <div className="flex-1 overflow-y-auto min-w-0">
 
+        {/* ── PRODUCTS ── */}
         {activeTab === "products" && (
           <div className="p-3 sidebar-tab-content">
-            <SectionLabel label="Style"/>
-            <div className="grid grid-cols-2 gap-2 mb-1">
-              {TSHIRT_STYLES.map(style => (
-                <button key={style.id} onClick={() => onStyleChange(style.svgPath)} className="rounded-xl p-2 transition-all"
-                  style={{ background:selectedStyle===style.svgPath?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.04)", border:selectedStyle===style.svgPath?"1px solid rgba(124,58,237,0.6)":"0.5px solid rgba(255,255,255,0.08)" }}>
-                  <div className="w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 overflow-hidden" style={{ background:"rgba(255,255,255,0.06)" }} dangerouslySetInnerHTML={{ __html:getTshirtSVG(style.svgPath,"#d0d0d0") }}/>
-                  <p className="text-[10px] text-center font-medium" style={{ color:"rgba(255,255,255,0.6)" }}>{style.name}</p>
-                </button>
-              ))}
-            </div>
 
+            <SectionLabel label="Garment"/>
+            <button
+              onClick={() => setGarmentModalOpen(true)}
+              className="w-full rounded-xl p-3 mb-1 flex items-center gap-3 transition-all"
+              style={{ background: "rgba(255,255,255,0.05)", border: "0.5px solid rgba(255,255,255,0.1)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.09)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            >
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: "rgba(255,255,255,0.06)" }}
+                dangerouslySetInnerHTML={{ __html: getTshirtSVG(selectedStyle, "#d0d0d0") }}
+              />
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-[12px] font-semibold truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  {TSHIRT_STYLES.find(s => s.svgPath === selectedStyle)?.name || "Classic Crew"}
+                </p>
+                <p className="text-[10px]" style={{ color: "rgba(124,58,237,0.9)" }}>Change garment →</p>
+              </div>
+            </button>
+
+            {/* ── COLOR ── */}
             <SectionLabel label="Shirt Color"/>
             <div className="flex flex-wrap gap-2 mb-2">
               {SHIRT_COLORS.map(color => (
@@ -148,6 +168,7 @@ export function LeftSidebar({
               ))}
             </div>
 
+            {/* Custom color picker */}
             <div className="flex items-center gap-2 p-2 rounded-xl mb-1" style={{ background:"rgba(255,255,255,0.04)", border:"0.5px solid rgba(255,255,255,0.08)" }}>
               <input type="color" value={customColor} onChange={e => { onCustomColor(e.target.value); onColorChange(e.target.value); }}
                 className="w-9 h-9 rounded-lg cursor-pointer shrink-0" style={{ border:"none", padding:2, background:"transparent" }}/>
@@ -158,47 +179,56 @@ export function LeftSidebar({
               <div className="w-6 h-6 rounded-full shrink-0" style={{ background:customColor, border:"1px solid rgba(255,255,255,0.2)" }}/>
             </div>
 
+            {/* ── TRANSFORM ── */}
             <div className="mt-4 p-3 rounded-xl" style={{ background:"rgba(255,255,255,0.03)", border:"0.5px solid rgba(255,255,255,0.07)" }}>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color:"rgba(255,255,255,0.3)" }}>Shirt Transform</p>
                 <Tooltip content="Reset all transforms" placement="top" className="bg-gray-800 text-white text-xs">
-                  <button onClick={onShirtReset} className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px]"
+                  <button onClick={onShirtReset} className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] transition-all"
                     style={{ background:"rgba(239,68,68,0.1)", border:"0.5px solid rgba(239,68,68,0.3)", color:"rgba(239,68,68,0.8)" }}>
                     <RefreshCw size={10}/> Reset
                   </button>
                 </Tooltip>
               </div>
 
+              {/* Rotation */}
               <p className="text-[10px] mb-1.5" style={{ color:"rgba(255,255,255,0.3)" }}>Rotation: {shirtRotation}°</p>
               <input type="range" min="0" max="360" value={shirtRotation}
                 onChange={e => onShirtRotation(Number(e.target.value))}
-                className="w-full mb-2 accent-violet-500"/>
-              <div className="flex gap-1.5 mb-3">
+                className="w-full mb-2 accent-violet-500" style={{ height:"4px" }}/>
+              <div className="flex gap-2 mb-3">
                 <IconBtn icon={RotateCcw} onClick={() => onShirtRotation(Math.max(0, shirtRotation-15))} title="Rotate -15°"/>
                 <IconBtn icon={RotateCw} onClick={() => onShirtRotation((shirtRotation+15)%360)} title="Rotate +15°"/>
-                {[0,90,180,270].map(deg => (
-                  <button key={deg} onClick={() => onShirtRotation(deg)}
-                    className="flex-1 h-8 rounded-lg text-[10px] transition-all"
-                    style={{ background:shirtRotation===deg?"rgba(124,58,237,0.3)":"rgba(255,255,255,0.06)", border:shirtRotation===deg?"0.5px solid rgba(124,58,237,0.6)":"0.5px solid rgba(255,255,255,0.1)", color:shirtRotation===deg?"#a78bfa":"rgba(255,255,255,0.5)" }}>
-                    {deg}°
-                  </button>
-                ))}
+                <button onClick={() => onShirtRotation(0)} className="flex-1 h-8 rounded-lg text-[10px] transition-all"
+                  style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.5)" }}>
+                  0°
+                </button>
+                <button onClick={() => onShirtRotation(90)} className="flex-1 h-8 rounded-lg text-[10px] transition-all"
+                  style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.5)" }}>
+                  90°
+                </button>
+                <button onClick={() => onShirtRotation(180)} className="flex-1 h-8 rounded-lg text-[10px] transition-all"
+                  style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.5)" }}>
+                  180°
+                </button>
               </div>
 
+              {/* Flip */}
               <p className="text-[10px] mb-1.5" style={{ color:"rgba(255,255,255,0.3)" }}>Flip</p>
               <div className="flex gap-2 mb-3">
                 <IconBtn icon={FlipHorizontal} onClick={onShirtFlipX} title="Flip horizontal" active={shirtFlipX}/>
                 <IconBtn icon={FlipVertical} onClick={onShirtFlipY} title="Flip vertical" active={shirtFlipY}/>
               </div>
 
+              {/* Scale */}
               <p className="text-[10px] mb-1.5" style={{ color:"rgba(255,255,255,0.3)" }}>Size: {Math.round(shirtScale*100)}%</p>
               <input type="range" min="50" max="150" value={Math.round(shirtScale*100)}
                 onChange={e => onShirtScale(Number(e.target.value)/100)}
-                className="w-full mb-2 accent-violet-500"/>
+                className="w-full mb-2 accent-violet-500" style={{ height:"4px" }}/>
               <div className="flex gap-2">
                 <IconBtn icon={ZoomOut} onClick={() => onShirtScale(Math.max(0.5, shirtScale-0.1))} title="Shrink shirt"/>
                 <IconBtn icon={ZoomIn} onClick={() => onShirtScale(Math.min(1.5, shirtScale+0.1))} title="Enlarge shirt"/>
-                <button onClick={() => onShirtScale(1)} className="flex-1 h-8 rounded-lg text-[10px]"
+                <button onClick={() => onShirtScale(1)} className="flex-1 h-8 rounded-lg text-[10px] transition-all"
                   style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.5)" }}>
                   100%
                 </button>
@@ -207,6 +237,7 @@ export function LeftSidebar({
           </div>
         )}
 
+        {/* ── UPLOAD ── */}
         {activeTab === "upload" && (
           <div className="p-3 sidebar-tab-content">
             <SectionLabel label="Upload Image"/>
@@ -238,6 +269,7 @@ export function LeftSidebar({
           </div>
         )}
 
+        {/* ── TEXT ── */}
         {activeTab === "text" && (
           <div className="p-3 sidebar-tab-content">
             <SectionLabel label="Add Text"/>
@@ -287,6 +319,7 @@ export function LeftSidebar({
           </div>
         )}
 
+        {/* ── TEMPLATES ── */}
         {activeTab === "templates" && (
           <div className="flex flex-col sidebar-tab-content" style={{ height:"100%" }}>
             <div className="p-3 pb-2 shrink-0">
@@ -334,6 +367,13 @@ export function LeftSidebar({
           </div>
         )}
       </div>
+
+      <GarmentPickerModal
+        isOpen={garmentModalOpen}
+        onClose={() => setGarmentModalOpen(false)}
+        selectedStyle={selectedStyle}
+        onSelectStyle={onStyleChange}
+      />
     </div>
   );
 }

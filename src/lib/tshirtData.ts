@@ -20,58 +20,17 @@ export const SHIRT_COLORS: ShirtColor[] = [
 ];
 
 export const TSHIRT_STYLES: TShirtStyle[] = [
-  {
-    id: "classic-crew",
-    name: "Classic Crew",
-    category: "Basics",
-    svgPath: "classic",
-  },
-  {
-    id: "v-neck",
-    name: "V-Neck",
-    category: "Basics",
-    svgPath: "vneck",
-  },
-  {
-    id: "polo",
-    name: "Polo",
-    category: "Casual",
-    svgPath: "polo",
-  },
-  {
-    id: "long-sleeve",
-    name: "Long Sleeve",
-    category: "Basics",
-    svgPath: "longsleeve",
-  },
-  {
-    id: "crop-top",
-    name: "Crop Top",
-    category: "Casual",
-    svgPath: "crop",
-  },
-  {
-    id: "hoodie",
-    name: "Hoodie",
-    category: "Premium",
-    svgPath: "hoodie",
-  },
+  { id: "classic-crew", name: "Classic Crew", category: "Basics", svgPath: "classic" },
+  { id: "v-neck", name: "V-Neck", category: "Basics", svgPath: "vneck" },
+  { id: "polo", name: "Polo", category: "Casual", svgPath: "polo" },
+  { id: "long-sleeve", name: "Long Sleeve", category: "Basics", svgPath: "longsleeve" },
+  { id: "crop-top", name: "Crop Top", category: "Casual", svgPath: "crop" },
+  { id: "hoodie", name: "Hoodie", category: "Premium", svgPath: "hoodie" },
 ];
 
 export const FONTS = [
-  "Inter",
-  "Arial",
-  "Georgia",
-  "Impact",
-  "Courier New",
-  "Times New Roman",
-  "Verdana",
-  "Trebuchet MS",
-  "Comic Sans MS",
-  "Palatino",
-  "Garamond",
-  "Bookman",
-  "Tahoma",
+  "Inter", "Arial", "Georgia", "Impact", "Courier New", "Times New Roman",
+  "Verdana", "Trebuchet MS", "Comic Sans MS", "Palatino", "Garamond", "Bookman", "Tahoma",
 ];
 
 export const TEMPLATE_DESIGNS = [
@@ -83,121 +42,209 @@ export const TEMPLATE_DESIGNS = [
   { id: "t6", name: "Abstract", emoji: "🎨" },
 ];
 
-// SVG string builders for each shirt style
+function hexToRgb(hex: string) {
+  const c = hex.replace("#", "");
+  return { r: parseInt(c.substr(0,2),16), g: parseInt(c.substr(2,2),16), b: parseInt(c.substr(4,2),16) };
+}
+function shade(hex: string, amt: number) {
+  const { r, g, b } = hexToRgb(hex);
+  const cl = (n: number) => Math.min(255, Math.max(0, n + amt));
+  return `rgb(${cl(r)},${cl(g)},${cl(b)})`;
+}
+function isLightColor(hex: string) {
+  const { r, g, b } = hexToRgb(hex);
+  return (0.299*r + 0.587*g + 0.114*b) > 140;
+}
+
+// Realistic SVG t-shirt with gradient fabric shading, fold lines, soft shadows
 export function getTshirtSVG(
   style: string,
   fillColor: string,
   isBack: boolean = false
 ): string {
-  const isLight =
-    parseInt(fillColor.slice(1, 3), 16) * 0.299 +
-      parseInt(fillColor.slice(3, 5), 16) * 0.587 +
-      parseInt(fillColor.slice(5, 7), 16) * 0.114 >
-    140;
-  const stroke = isLight ? "#c8c8c8" : "rgba(255,255,255,0.15)";
-  const shading = isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)";
-  const seam = isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
+  const light = isLightColor(fillColor);
+  // Deterministic id derived from inputs so server and client render identically (avoids hydration mismatch)
+  const id = `${style}-${fillColor.replace("#", "")}-${isBack ? "b" : "f"}`;
+
+  const lit    = shade(fillColor, light ? 10 : 38);
+  const litSoft= shade(fillColor, light ? 4 : 18);
+  const mid    = fillColor;
+  const dark   = shade(fillColor, light ? -34 : -16);
+  const vdark  = shade(fillColor, light ? -55 : -28);
+  const sleeveL= shade(fillColor, light ? -22 : -8);
+  const sleeveD= shade(fillColor, light ? -48 : -22);
+
+  const stroke = light ? "rgba(0,0,0,0.22)" : "rgba(255,255,255,0.16)";
+  const seam   = light ? "rgba(0,0,0,0.16)" : "rgba(255,255,255,0.13)";
+  const foldL  = light ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.08)";
+
+  const defs = `
+    <defs>
+      <linearGradient id="bodyGrad-${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${lit}"/>
+        <stop offset="28%" stop-color="${litSoft}"/>
+        <stop offset="55%" stop-color="${mid}"/>
+        <stop offset="85%" stop-color="${dark}"/>
+        <stop offset="100%" stop-color="${vdark}"/>
+      </linearGradient>
+      <linearGradient id="leftSleeveGrad-${id}" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="${vdark}"/>
+        <stop offset="100%" stop-color="${sleeveL}"/>
+      </linearGradient>
+      <linearGradient id="rightSleeveGrad-${id}" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="${sleeveL}"/>
+        <stop offset="100%" stop-color="${vdark}"/>
+      </linearGradient>
+      <radialGradient id="vignette-${id}" cx="50%" cy="32%" r="70%">
+        <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+        <stop offset="60%" stop-color="rgba(255,255,255,0)"/>
+        <stop offset="100%" stop-color="${light ? "rgba(0,0,0,0.16)" : "rgba(0,0,0,0.26)"}"/>
+      </radialGradient>
+      <filter id="softShadow-${id}" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0,0,0,0.35)" flood-opacity="0.5"/>
+      </filter>
+      <linearGradient id="highlightGrad-${id}" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="${light ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.18)"}"/>
+        <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+      </linearGradient>
+    </defs>
+  `;
+
+  const foldLines = (bx0: number, bx1: number, by0: number, by1: number) => `
+    <path d="M${bx0 + (bx1-bx0)*0.30} ${by0 + (by1-by0)*0.30} Q${bx0 + (bx1-bx0)*0.36} ${by0 + (by1-by0)*0.55} ${bx0 + (bx1-bx0)*0.32} ${by1 - (by1-by0)*0.08}"
+          fill="none" stroke="${foldL}" stroke-width="2" opacity="0.7"/>
+    <path d="M${bx0 + (bx1-bx0)*0.62} ${by0 + (by1-by0)*0.28} Q${bx0 + (bx1-bx0)*0.68} ${by0 + (by1-by0)*0.5} ${bx0 + (bx1-bx0)*0.64} ${by1 - (by1-by0)*0.1}"
+          fill="none" stroke="${foldL}" stroke-width="1.5" opacity="0.55"/>
+  `;
 
   const svgs: Record<string, string> = {
     classic: `
       <svg viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body -->
-        <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 292 L75 292 L75 108 L30 90 Z" 
-              fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
-        <!-- Left sleeve shading -->
-        <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="${shading}"/>
-        <!-- Right sleeve shading -->
-        <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="${shading}"/>
-        <!-- Collar -->
-        <path d="M80 28 Q140 48 200 28" fill="none" stroke="${seam}" stroke-width="2"/>
-        <!-- Side seams -->
-        <line x1="75" y1="108" x2="75" y2="292" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="205" y1="108" x2="205" y2="292" stroke="${seam}" stroke-width="0.8"/>
-        <!-- Bottom hem -->
-        <line x1="75" y1="288" x2="205" y2="288" stroke="${seam}" stroke-width="1"/>
-        <!-- Armhole seam -->
-        <path d="M75 108 Q90 114 140 116 Q190 114 205 108" fill="none" stroke="${seam}" stroke-width="0.8"/>
-        ${isBack ? `<text x="140" y="200" text-anchor="middle" fill="${isLight ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)"}" font-size="11" font-family="Inter,Arial">BACK</text>` : ""}
+        ${defs}
+        <g filter="url(#softShadow-${id})">
+          <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="url(#leftSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="url(#rightSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 292 L75 292 L75 108 L30 90 Z"
+                fill="url(#bodyGrad-${id})" stroke="${stroke}" stroke-width="1.5"/>
+        </g>
+        ${foldLines(75, 205, 108, 292)}
+        <path d="M80 28 Q140 48 200 28" fill="none" stroke="${seam}" stroke-width="2.2"/>
+        <path d="M82 30 Q140 49 198 30" fill="none" stroke="${light ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.1)"}" stroke-width="0.8"/>
+        <line x1="75" y1="108" x2="75" y2="292" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="205" y1="108" x2="205" y2="292" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="75" y1="285" x2="205" y2="285" stroke="${seam}" stroke-width="1.4"/>
+        <line x1="75" y1="289" x2="205" y2="289" stroke="${seam}" stroke-width="0.8"/>
+        <path d="M75 108 Q90 116 140 118 Q190 116 205 108" fill="none" stroke="${seam}" stroke-width="0.9"/>
+        <path d="M80 30 L60 80" fill="none" stroke="url(#highlightGrad-${id})" stroke-width="14" opacity="0.5"/>
+        <rect x="75" y="28" width="130" height="264" fill="url(#vignette-${id})"/>
+        ${isBack ? `<text x="140" y="200" text-anchor="middle" fill="${seam}" font-size="11" font-family="Inter,Arial">BACK</text>` : ""}
       </svg>
     `,
     vneck: `
       <svg viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg">
-        <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 292 L75 292 L75 108 L30 90 Z" 
-              fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
-        <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="${shading}"/>
-        <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="${shading}"/>
-        <!-- V-neck collar -->
-        <path d="M80 28 L140 72 L200 28" fill="none" stroke="${seam}" stroke-width="2"/>
-        <line x1="75" y1="108" x2="75" y2="292" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="205" y1="108" x2="205" y2="292" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="75" y1="288" x2="205" y2="288" stroke="${seam}" stroke-width="1"/>
-        <path d="M75 108 Q90 114 140 116 Q190 114 205 108" fill="none" stroke="${seam}" stroke-width="0.8"/>
+        ${defs}
+        <g filter="url(#softShadow-${id})">
+          <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="url(#leftSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="url(#rightSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 292 L75 292 L75 108 L30 90 Z"
+                fill="url(#bodyGrad-${id})" stroke="${stroke}" stroke-width="1.5"/>
+        </g>
+        ${foldLines(75, 205, 108, 292)}
+        <path d="M80 28 L140 72 L200 28" fill="none" stroke="${seam}" stroke-width="2.2"/>
+        <path d="M82 29 L140 70 L198 29" fill="none" stroke="${light ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.1)"}" stroke-width="0.8"/>
+        <line x1="75" y1="108" x2="75" y2="292" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="205" y1="108" x2="205" y2="292" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="75" y1="285" x2="205" y2="285" stroke="${seam}" stroke-width="1.4"/>
+        <path d="M75 108 Q90 116 140 118 Q190 116 205 108" fill="none" stroke="${seam}" stroke-width="0.9"/>
+        <path d="M80 30 L60 80" fill="none" stroke="url(#highlightGrad-${id})" stroke-width="14" opacity="0.5"/>
+        <rect x="75" y="28" width="130" height="264" fill="url(#vignette-${id})"/>
       </svg>
     `,
     polo: `
       <svg viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg">
-        <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 292 L75 292 L75 108 L30 90 Z" 
-              fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
-        <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="${shading}"/>
-        <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="${shading}"/>
-        <!-- Polo collar -->
-        <path d="M110 28 L110 60 Q140 70 170 60 L170 28" fill="${fillColor}" stroke="${seam}" stroke-width="1.5"/>
-        <line x1="140" y1="60" x2="140" y2="90" stroke="${seam}" stroke-width="1.2"/>
-        <!-- Buttons -->
-        <circle cx="140" cy="65" r="2" fill="${seam}"/>
-        <circle cx="140" cy="75" r="2" fill="${seam}"/>
-        <circle cx="140" cy="85" r="2" fill="${seam}"/>
-        <line x1="75" y1="288" x2="205" y2="288" stroke="${seam}" stroke-width="1"/>
-        <path d="M75 108 Q90 114 140 116 Q190 114 205 108" fill="none" stroke="${seam}" stroke-width="0.8"/>
+        ${defs}
+        <g filter="url(#softShadow-${id})">
+          <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="url(#leftSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="url(#rightSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 292 L75 292 L75 108 L30 90 Z"
+                fill="url(#bodyGrad-${id})" stroke="${stroke}" stroke-width="1.5"/>
+        </g>
+        ${foldLines(75, 205, 108, 292)}
+        <path d="M110 28 L110 60 Q140 70 170 60 L170 28" fill="${mid}" stroke="${seam}" stroke-width="1.5"/>
+        <line x1="140" y1="60" x2="140" y2="92" stroke="${seam}" stroke-width="1"/>
+        <circle cx="140" cy="68" r="2" fill="${seam}"/>
+        <circle cx="140" cy="78" r="2" fill="${seam}"/>
+        <circle cx="140" cy="88" r="2" fill="${seam}"/>
+        <line x1="75" y1="108" x2="75" y2="292" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="205" y1="108" x2="205" y2="292" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="75" y1="285" x2="205" y2="285" stroke="${seam}" stroke-width="1.4"/>
+        <path d="M75 108 Q90 116 140 118 Q190 116 205 108" fill="none" stroke="${seam}" stroke-width="0.9"/>
+        <path d="M80 30 L60 80" fill="none" stroke="url(#highlightGrad-${id})" stroke-width="14" opacity="0.5"/>
+        <rect x="75" y="28" width="130" height="264" fill="url(#vignette-${id})"/>
       </svg>
     `,
     longsleeve: `
       <svg viewBox="0 0 280 340" xmlns="http://www.w3.org/2000/svg">
-        <path d="M80 28 Q140 8 200 28 L258 100 L230 240 L215 240 L210 112 L210 300 L70 300 L70 112 L65 240 L50 240 L22 100 Z" 
-              fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
-        <path d="M80 28 Q140 48 200 28" fill="none" stroke="${seam}" stroke-width="2"/>
-        <line x1="70" y1="112" x2="70" y2="300" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="210" y1="112" x2="210" y2="300" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="70" y1="296" x2="210" y2="296" stroke="${seam}" stroke-width="1"/>
-        <!-- Sleeve cuffs -->
-        <line x1="50" y1="235" x2="230" y2="235" stroke="${seam}" stroke-width="1" stroke-dasharray="200,0"/>
-        <line x1="50" y1="232" x2="65" y2="232" stroke="${seam}" stroke-width="1"/>
-        <line x1="215" y1="232" x2="230" y2="232" stroke="${seam}" stroke-width="1"/>
+        ${defs}
+        <g filter="url(#softShadow-${id})">
+          <path d="M80 28 L22 100 L50 235 L65 240 L70 112 Z" fill="url(#leftSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M200 28 L258 100 L230 235 L215 240 L210 112 Z" fill="url(#rightSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M80 28 Q140 8 200 28 L210 112 L210 300 L70 300 L70 112 Z"
+                fill="url(#bodyGrad-${id})" stroke="${stroke}" stroke-width="1.5"/>
+        </g>
+        ${foldLines(70, 210, 112, 300)}
+        <path d="M80 28 Q140 48 200 28" fill="none" stroke="${seam}" stroke-width="2.2"/>
+        <line x1="70" y1="112" x2="70" y2="300" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="210" y1="112" x2="210" y2="300" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="70" y1="293" x2="210" y2="293" stroke="${seam}" stroke-width="1.4"/>
+        <line x1="50" y1="232" x2="65" y2="232" stroke="${seam}" stroke-width="1.2"/>
+        <line x1="215" y1="232" x2="230" y2="232" stroke="${seam}" stroke-width="1.2"/>
+        <path d="M80 30 L65 90" fill="none" stroke="url(#highlightGrad-${id})" stroke-width="14" opacity="0.5"/>
+        <rect x="70" y="28" width="140" height="272" fill="url(#vignette-${id})"/>
       </svg>
     `,
     crop: `
       <svg viewBox="0 0 280 250" xmlns="http://www.w3.org/2000/svg">
-        <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 220 L75 220 L75 108 L30 90 Z" 
-              fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
-        <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="${shading}"/>
-        <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="${shading}"/>
-        <path d="M80 28 Q140 48 200 28" fill="none" stroke="${seam}" stroke-width="2"/>
-        <line x1="75" y1="108" x2="75" y2="220" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="205" y1="108" x2="205" y2="220" stroke="${seam}" stroke-width="0.8"/>
-        <!-- Crop hem -->
-        <line x1="75" y1="216" x2="205" y2="216" stroke="${seam}" stroke-width="1.5"/>
-        <path d="M75 108 Q90 114 140 116 Q190 114 205 108" fill="none" stroke="${seam}" stroke-width="0.8"/>
+        ${defs}
+        <g filter="url(#softShadow-${id})">
+          <path d="M80 28 L30 90 L55 99 L76 55 Z" fill="url(#leftSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M200 28 L250 90 L225 99 L204 55 Z" fill="url(#rightSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M80 28 Q140 8 200 28 L250 90 L205 108 L205 220 L75 220 L75 108 L30 90 Z"
+                fill="url(#bodyGrad-${id})" stroke="${stroke}" stroke-width="1.5"/>
+        </g>
+        ${foldLines(75, 205, 108, 220)}
+        <path d="M80 28 Q140 48 200 28" fill="none" stroke="${seam}" stroke-width="2.2"/>
+        <line x1="75" y1="108" x2="75" y2="220" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="205" y1="108" x2="205" y2="220" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="75" y1="214" x2="205" y2="214" stroke="${seam}" stroke-width="1.6"/>
+        <path d="M75 108 Q90 116 140 118 Q190 116 205 108" fill="none" stroke="${seam}" stroke-width="0.9"/>
+        <path d="M80 30 L60 80" fill="none" stroke="url(#highlightGrad-${id})" stroke-width="14" opacity="0.5"/>
+        <rect x="75" y="28" width="130" height="192" fill="url(#vignette-${id})"/>
       </svg>
     `,
     hoodie: `
       <svg viewBox="0 0 280 340" xmlns="http://www.w3.org/2000/svg">
-        <path d="M80 28 Q140 8 200 28 L250 95 L205 112 L205 305 L75 305 L75 112 L30 95 Z" 
-              fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
-        <!-- Hood -->
-        <path d="M80 28 Q100 0 140 0 Q180 0 200 28" fill="${fillColor}" stroke="${stroke}" stroke-width="1.5"/>
+        ${defs}
+        <g filter="url(#softShadow-${id})">
+          <path d="M80 28 L30 95 L55 104 L76 60 Z" fill="url(#leftSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M200 28 L250 95 L225 104 L204 60 Z" fill="url(#rightSleeveGrad-${id})" stroke="${stroke}" stroke-width="1.2"/>
+          <path d="M80 28 Q100 0 140 0 Q180 0 200 28 L250 95 L205 112 L205 305 L75 305 L75 112 L30 95 Z"
+                fill="url(#bodyGrad-${id})" stroke="${stroke}" stroke-width="1.5"/>
+        </g>
+        ${foldLines(75, 205, 112, 305)}
         <path d="M100 10 Q140 18 180 10" fill="none" stroke="${seam}" stroke-width="1"/>
-        <!-- Kangaroo pocket -->
-        <rect x="100" y="195" width="80" height="50" rx="4" fill="none" stroke="${seam}" stroke-width="1.2"/>
-        <line x1="140" y1="195" x2="140" y2="245" stroke="${seam}" stroke-width="0.8"/>
-        <!-- Drawstrings -->
-        <line x1="125" y1="0" x2="118" y2="40" stroke="${seam}" stroke-width="1"/>
-        <line x1="155" y1="0" x2="162" y2="40" stroke="${seam}" stroke-width="1"/>
+        <rect x="100" y="195" width="80" height="50" rx="4" fill="none" stroke="${seam}" stroke-width="1.3"/>
+        <line x1="140" y1="195" x2="140" y2="245" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="125" y1="0" x2="118" y2="40" stroke="${seam}" stroke-width="1.2"/>
+        <line x1="155" y1="0" x2="162" y2="40" stroke="${seam}" stroke-width="1.2"/>
         <circle cx="118" cy="42" r="3" fill="${seam}"/>
         <circle cx="162" cy="42" r="3" fill="${seam}"/>
-        <line x1="75" y1="112" x2="75" y2="305" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="205" y1="112" x2="205" y2="305" stroke="${seam}" stroke-width="0.8"/>
-        <line x1="75" y1="301" x2="205" y2="301" stroke="${seam}" stroke-width="1"/>
-        <path d="M75 112 Q90 118 140 120 Q190 118 205 112" fill="none" stroke="${seam}" stroke-width="0.8"/>
+        <line x1="75" y1="112" x2="75" y2="305" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="205" y1="112" x2="205" y2="305" stroke="${seam}" stroke-width="0.9"/>
+        <line x1="75" y1="298" x2="205" y2="298" stroke="${seam}" stroke-width="1.4"/>
+        <path d="M75 112 Q90 120 140 122 Q190 120 205 112" fill="none" stroke="${seam}" stroke-width="0.9"/>
+        <path d="M80 32 L65 92" fill="none" stroke="url(#highlightGrad-${id})" stroke-width="14" opacity="0.5"/>
+        <rect x="75" y="0" width="130" height="305" fill="url(#vignette-${id})"/>
       </svg>
     `,
   };
