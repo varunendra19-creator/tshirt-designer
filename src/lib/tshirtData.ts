@@ -20,12 +20,23 @@ export const SHIRT_COLORS: ShirtColor[] = [
 ];
 
 export const TSHIRT_STYLES: TShirtStyle[] = [
-  { id: "classic-crew", name: "Classic Crew", category: "Basics", svgPath: "classic" },
-  { id: "v-neck", name: "V-Neck", category: "Basics", svgPath: "vneck" },
-  { id: "polo", name: "Polo", category: "Casual", svgPath: "polo" },
-  { id: "long-sleeve", name: "Long Sleeve", category: "Basics", svgPath: "longsleeve" },
-  { id: "crop-top", name: "Crop Top", category: "Casual", svgPath: "crop" },
-  { id: "hoodie", name: "Hoodie", category: "Premium", svgPath: "hoodie" },
+  { id: "classic-crew", name: "Classic Crew",     category: "Basics",   svgPath: "classic" },
+  { id: "v-neck",       name: "V-Neck",           category: "Basics",   svgPath: "vneck" },
+  { id: "polo",         name: "Polo",             category: "Casual",   svgPath: "polo" },
+  { id: "long-sleeve",  name: "Long Sleeve",      category: "Basics",   svgPath: "longsleeve" },
+  { id: "oversized",    name: "Oversized",        category: "Casual",   svgPath: "oversized" },
+  { id: "hoodie",       name: "Hoodie",           category: "Premium",  svgPath: "hoodie" },
+  { id: "female",       name: "Women's Tee",      category: "Casual",   svgPath: "female" },
+  { id: "amazigh1",     name: "Amazigh Vol.1",    category: "Special",  svgPath: "amazigh1" },
+  { id: "amazigh2",     name: "Amazigh Vol.2",    category: "Special",  svgPath: "amazigh2" },
+  { id: "dragon",       name: "Dragon Tee",       category: "Special",  svgPath: "dragon" },
+  { id: "purple",       name: "Apex Tee",         category: "Special",  svgPath: "purple" },
+  { id: "holidays",     name: "Holidays Cap",     category: "Special",  svgPath: "holidays" },
+  { id: "jotaro",       name: "Jotaro Edition",   category: "Special",  svgPath: "jotaro" },
+  { id: "design",       name: "Design Tee",       category: "Special",  svgPath: "design" },
+  { id: "polo2",        name: "Polo Lengan",      category: "Casual",   svgPath: "polo2" },
+  { id: "trenobike",    name: "Trenobike",        category: "Special",  svgPath: "trenobike" },
+  { id: "mockup",       name: "Brock Mockup",     category: "Special",  svgPath: "mockup" },
 ];
 
 export const FONTS = [

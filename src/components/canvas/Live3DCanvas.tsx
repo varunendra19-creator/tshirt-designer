@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
-import { buildShirtGroup } from "@/lib/buildShirtGeometry";
+import React, { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import { getModelPath } from "../../lib/garmentModels";
 
 interface Live3DCanvasProps {
   shirtColor: string;
@@ -11,7 +11,7 @@ interface Live3DCanvasProps {
   onSaveHistory: () => void;
 }
 
-const TEX_SIZE = 1024;
+const TEX_SIZE = 1024; // Higher resolution for sharp text on 3D plane
 
 export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
   shirtColor, shirtStyle, viewSide, onSelectObject, onSaveHistory,
@@ -26,6 +26,7 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
   const groupRef = useRef<any>(null);
   const canvasTextureRef = useRef<any>(null);
   const fabricCanvasRef = useRef<any>(null);
+  const syncToTextureRef = useRef<(() => void) | null>(null);
   const historyStackRef = useRef<string[]>([]);
   const historyIndexRef = useRef<number>(-1);
   const isRestoringRef = useRef<boolean>(false);
@@ -35,12 +36,65 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
 
   const [isReady, setIsReady] = useState(false);
   const [isAuto, setIsAuto] = useState(false);
+  const [isFrontFacing, setIsFrontFacing] = useState(true);
 
-  // ── Build the shirt geometry (same reliable single-outline extrude as before) ──
-  const buildShirt = useCallback((THREE: any, style: string) => {
-    const { group, bodyMesh } = buildShirtGroup(THREE, style);
-    bodyMeshRef.current = bodyMesh;
-    return group;
+  // ── Load the real GLB shirt model from public/models/t_shirt.glb ──
+  const loadShirt = useCallback(async (THREE: any, style: string, color: string) => {
+    const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js" as any);
+    const loader = new GLTFLoader();
+    const modelPath = getModelPath(style);
+
+    return new Promise<any>((resolve) => {
+      loader.load(
+        modelPath,
+        (gltf: any) => {
+          const model = gltf.scene;
+
+          // Center and scale the model to fit the scene
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const targetSize = 2.2;
+          const scale = targetSize / maxDim;
+
+          model.scale.setScalar(scale);
+          model.position.sub(center.multiplyScalar(scale));
+
+          // Replace material entirely so color picker works even on baked-texture GLBs
+          model.traverse((child: any) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+              // Replace with fresh MeshStandardMaterial — ignores any baked texture
+              // so shirt color always updates correctly from the color picker
+              child.material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(color),
+                roughness: 0.82,
+                metalness: 0.02,
+              });
+              if (!bodyMeshRef.current) {
+                bodyMeshRef.current = child;
+              }
+            }
+          });
+
+          resolve(model);
+        },
+        undefined,
+        (err: any) => {
+          console.error("GLB load failed, falling back to procedural geometry:", err);
+          import("../../lib/buildShirtGeometry").then(({ buildShirtGroup }) => {
+            const { group, bodyMesh } = buildShirtGroup(THREE, "classic");
+            bodyMeshRef.current = bodyMesh;
+            group.traverse((c: any) => {
+              if (c.isMesh) { c.material.color = new THREE.Color(color); }
+            });
+            resolve(group);
+          });
+        }
+      );
+    });
   }, []);
 
   // ── Attach Fabric.js to the VISIBLE overlay canvas so users can directly
@@ -92,11 +146,10 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
 
   const initDrawSurface = useCallback(async (THREE: any) => {
     const { fabric } = await import("fabric");
-    if (!fabricOverlayElRef.current) return null;
 
-    // Internal resolution stays high (TEX_SIZE) regardless of on-screen CSS size,
-    // fabric scales pointer coordinates automatically based on canvas element size.
-    const fc = new fabric.Canvas(fabricOverlayElRef.current, {
+    const targetEl = fabricOverlayElRef.current || document.createElement("canvas");
+
+    const fc = new fabric.Canvas(targetEl, {
       width: TEX_SIZE,
       height: TEX_SIZE,
       backgroundColor: "transparent",
@@ -104,43 +157,97 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     });
     fabricCanvasRef.current = fc;
 
+    // Wait for Fabric to initialize its internal canvases
+    await new Promise(r => setTimeout(r, 100));
+
+    // Use lowerCanvasEl DIRECTLY as the Three.js texture source.
+    // No intermediate offscreen canvas — eliminates all copy/scale bugs.
+    const lowerCanvas = fc.lowerCanvasEl;
+    console.log("[ThreadCraft] Fabric lowerCanvasEl:", lowerCanvas?.width, "x", lowerCanvas?.height);
+
+    (window as any).__fabricCanvas = fc;
+
+    const tex = new THREE.CanvasTexture(lowerCanvas);
+    tex.flipY = false;
+    try { tex.colorSpace = THREE.SRGBColorSpace; } catch {}
+    tex.anisotropy = 8;
+    canvasTextureRef.current = tex;
+
+    // syncToTexture: just mark the texture dirty — Three.js reads lowerCanvas each frame
+    const syncToTexture = () => {
+      if (canvasTextureRef.current) {
+        canvasTextureRef.current.needsUpdate = true;
+      }
+    };
+    syncToTextureRef.current = syncToTexture;
+    (window as any).__fabricSyncFn = syncToTexture;
+
     fc.on("selection:created", (e: any) => { isAutoRef.current = false; setIsAuto(false); onSelectObject(e.selected?.[0]); });
     fc.on("selection:updated", (e: any) => { isAutoRef.current = false; setIsAuto(false); onSelectObject(e.selected?.[0]); });
     fc.on("selection:cleared", () => onSelectObject(null));
-    fc.on("object:modified", () => { updateTexture(); onSaveHistory(); pushHistory(); });
-    fc.on("object:moving", () => { isAutoRef.current = false; setIsAuto(false); updateTexture(); });
-    fc.on("object:scaling", () => { isAutoRef.current = false; setIsAuto(false); updateTexture(); });
-    fc.on("object:rotating", () => { isAutoRef.current = false; setIsAuto(false); updateTexture(); });
+    fc.on("object:added", () => { fc.renderAll(); syncToTexture(); });
+    fc.on("object:modified", () => { fc.renderAll(); syncToTexture(); onSaveHistory(); pushHistory(); });
+    fc.on("object:moving", () => { isAutoRef.current = false; setIsAuto(false); syncToTexture(); });
+    fc.on("object:scaling", () => { isAutoRef.current = false; setIsAuto(false); syncToTexture(); });
+    fc.on("object:rotating", () => { isAutoRef.current = false; setIsAuto(false); syncToTexture(); });
+    fc.on("after:render", syncToTexture);
     fc.on("mouse:down", () => { isAutoRef.current = false; setIsAuto(false); });
-
-    const tex = new THREE.CanvasTexture(fc.getElement());
-    tex.flipY = true;
-    try { tex.colorSpace = THREE.SRGBColorSpace; } catch {}
-    canvasTextureRef.current = tex;
 
     return tex;
   }, [onSelectObject, onSaveHistory, pushHistory]);
 
   const updateTexture = useCallback(() => {
-    if (canvasTextureRef.current) canvasTextureRef.current.needsUpdate = true;
+    const fc = fabricCanvasRef.current;
+    if (fc) fc.renderAll();
+    if (canvasTextureRef.current) {
+      canvasTextureRef.current.needsUpdate = true;
+    }
+    if (rendererRef.current && sceneRef.current && cameraRef.current) {
+      rendererRef.current.render(sceneRef.current, cameraRef.current);
+    }
   }, []);
 
   // ── Attach the live texture as a decal on the shirt front ──
   const attachDecal = useCallback(async (THREE: any, group: any, tex: any) => {
-    const { DecalGeometry } = await import("three/examples/jsm/geometries/DecalGeometry.js" as any);
-    if (!bodyMeshRef.current) return;
+    if (!bodyMeshRef.current) {
+      console.error("[ThreadCraft] attachDecal: bodyMeshRef is null — plane not created!");
+      return;
+    }
+    console.log("[ThreadCraft] attachDecal: creating plane mesh...");
 
-    const position = new THREE.Vector3(0, 0.05, 0.13);
-    const orientation = new THREE.Euler(0, 0, 0);
-    const size = new THREE.Vector3(0.62, 0.62, 0.5);
-    const decalGeo = new DecalGeometry(bodyMeshRef.current, position, orientation, size);
-    const decalMat = new THREE.MeshStandardMaterial({
-      map: tex, transparent: true, depthTest: true, depthWrite: false,
-      polygonOffset: true, polygonOffsetFactor: -4, roughness: 0.85, metalness: 0.0,
+    // Compute print area from actual mesh bounding box
+    const box = new THREE.Box3().setFromObject(bodyMeshRef.current);
+    const center = box.getCenter(new THREE.Vector3());
+    const size3 = box.getSize(new THREE.Vector3());
+
+    // Place a flat plane ON the shirt front face, parented to the group
+    // so it rotates with the shirt automatically — no DecalGeometry needed
+    // Model is normalized to 2.2 units tall — hardcode generous plane size
+    const printW = 1.4;  // ~64% of 2.2 unit wide shirt
+    const printH = 1.2;  // covers most of torso height
+    const chestY = center.y - 0.1;
+    const frontZ = box.max.z + 0.05;
+
+    const planeGeo = new THREE.PlaneGeometry(printW, printH, 8, 8);
+    const planeMat = new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+      polygonOffset: false,
     });
-    const decalMesh = new THREE.Mesh(decalGeo, decalMat);
-    decalMesh.name = "decal";
-    group.add(decalMesh);
+    // Improve texture sharpness
+    if (tex) {
+      tex.anisotropy = 8;
+      tex.needsUpdate = true;
+    }
+    const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+    planeMesh.name = "decal";
+    planeMesh.position.set(center.x, chestY, frontZ);
+    group.add(planeMesh);
+    console.log("[ThreadCraft] Plane added at", center.x, chestY, frontZ, "size:", printW.toFixed(3), "x", printH.toFixed(3));
+    console.log("[ThreadCraft] Texture source:", tex?.image?.width, "x", tex?.image?.height);
+    (window as any).__decalMesh = planeMesh;
   }, []);
 
   // ── Init Three.js scene ──
@@ -213,27 +320,58 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
       controls.minPolarAngle = Math.PI * 0.28;
       controlsRef.current = controls;
 
-      const group = buildShirt(THREE, shirtStyle);
+      const group = await loadShirt(THREE, shirtStyle, shirtColor);
       scene.add(group);
       groupRef.current = group;
+      // Debug exposure
+      (window as any).__threeGroup = group;
+      (window as any).__threeScene = scene;
+      (window as any).__threeRenderer = renderer;
+      (window as any).__threeCamera = camera;
 
-      const tex = await initDrawSurface(THREE);
-      await attachDecal(THREE, group, tex);
+      // Model is always normalized to 2.2 units tall in loadShirt.
+      // Fixed camera distance gives consistent framing for ALL models.
+      const fov = camera.fov * (Math.PI / 180);
+      const dist = (2.2 / 2) / Math.tan(fov / 2) * 1.55;
+      camera.position.set(0, 0, dist);
+      controls.target.set(0, 0, 0);
+      controls.update();
 
       // Apply initial color
       group.traverse((c: any) => { if (c.isMesh && c.name !== "decal") { c.material.color = new THREE.Color(shirtColor); } });
+
+      // Set ready FIRST so the overlay canvas div renders in DOM
+      setIsReady(true);
+
+      // Now wait for React to render the overlay canvas element
+      await new Promise<void>(resolve => {
+        if (fabricOverlayElRef.current) { resolve(); return; }
+        const check = setInterval(() => {
+          if (fabricOverlayElRef.current) { clearInterval(check); resolve(); }
+        }, 50);
+        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
+      });
+
+      const tex = await initDrawSurface(THREE);
+      await attachDecal(THREE, group, tex);
 
       // Reset and seed history with the empty-canvas baseline so undo can return to a blank state
       historyStackRef.current = [];
       historyIndexRef.current = -1;
       pushHistory();
 
-      setIsReady(true);
-
       const animate = () => {
         rafRef.current = requestAnimationFrame(animate);
         if (isAutoRef.current && groupRef.current) groupRef.current.rotation.y += 0.006;
+        // Sync fabric canvas to texture every frame
+        if ((window as any).__fabricSyncFn) (window as any).__fabricSyncFn();
         if (canvasTextureRef.current) canvasTextureRef.current.needsUpdate = true;
+        // Check if shirt is roughly facing front (rotation within ±60°)
+        if (groupRef.current) {
+          const rot = ((groupRef.current.rotation.y % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+          const facing = rot < Math.PI * 0.35 || rot > Math.PI * 1.65;
+          setIsFrontFacing(facing);
+        }
         controls.update();
         renderer.render(scene, camera);
       };
@@ -294,7 +432,9 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
         const maxSize = TEX_SIZE * 0.55;
         const scale = Math.min(maxSize / (img.width ?? 1), maxSize / (img.height ?? 1));
         img.set({ left: TEX_SIZE/2, top: TEX_SIZE/2, scaleX: scale, scaleY: scale, originX: "center", originY: "center" });
-        fc.add(img); fc.setActiveObject(img); fc.renderAll(); updateTexture(); onSaveHistory(); pushHistory();
+        fc.add(img); fc.setActiveObject(img); fc.renderAll(); updateTexture();
+        setTimeout(() => updateTexture(), 50);
+        onSaveHistory(); pushHistory();
       });
     };
     reader.readAsDataURL(file);
@@ -307,11 +447,13 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     const { fabric } = await import("fabric");
     const content = options.content.replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
     const text = new fabric.Textbox(content, {
-      left: TEX_SIZE/2, top: TEX_SIZE/2, width: TEX_SIZE * 0.6, originX: "center", originY: "center",
-      fontFamily: options.fontFamily, fontSize: options.fontSize * 1.1, fontWeight: options.fontWeight,
+      left: TEX_SIZE/2, top: TEX_SIZE/2, width: TEX_SIZE * 0.8, originX: "center", originY: "center",
+      fontFamily: options.fontFamily, fontSize: options.fontSize * 5, fontWeight: options.fontWeight,
       fontStyle: options.fontStyle, fill: options.fill, textAlign: options.textAlign, underline: options.underline,
     });
-    fc.add(text); fc.setActiveObject(text); fc.renderAll(); updateTexture(); onSaveHistory(); pushHistory();
+    fc.add(text); fc.setActiveObject(text); fc.renderAll(); updateTexture();
+    setTimeout(() => updateTexture(), 50);
+    onSaveHistory(); pushHistory();
   }, [updateTexture, onSaveHistory, pushHistory]);
 
   const addTemplate = useCallback(async (lines: any[]) => {
@@ -325,7 +467,7 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     for (const line of lines) {
       const tb = new fabric.Textbox(line.text, {
         width: maxW, originX: "center", originY: "top",
-        fontFamily: line.font, fontSize: line.size * 1.1, fontWeight: line.weight,
+        fontFamily: line.font, fontSize: line.size * 5, fontWeight: line.weight,
         fontStyle: line.style || "normal", fill: line.color, textAlign: "center", name: "template",
       });
       textObjs.push(tb);
@@ -388,34 +530,106 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     updateTexture,
   }));
 
+  // Handle drop directly onto the 3D shirt canvas
+  const handleCanvasDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    const raw = e.dataTransfer.getData("text/plain");
+    if (!raw) return;
+
+    const fc = fabricCanvasRef.current;
+    if (!fc) return;
+
+    const canvasEl = mountRef.current;
+    if (!canvasEl) return;
+    const rect = canvasEl.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const dropX = ((e.clientX - rect.left) / rect.width) * TEX_SIZE * dpr;
+    const dropY = ((e.clientY - rect.top) / rect.height) * TEX_SIZE * dpr;
+
+    const sync = () => {
+      fc.renderAll();
+      if (syncToTextureRef.current) syncToTextureRef.current();
+      // Also trigger after a frame to ensure GPU flush
+      setTimeout(() => {
+        fc.renderAll();
+        if (syncToTextureRef.current) syncToTextureRef.current();
+      }, 50);
+    };
+
+    try {
+      const data = JSON.parse(raw);
+      const { fabric } = await import("fabric");
+
+      if (data.type === "text") {
+        const text = new fabric.Textbox(data.content || "Text", {
+          left: dropX,
+          top: dropY,
+          originX: "center",
+          originY: "center",
+          width: TEX_SIZE * 0.6 * (window.devicePixelRatio || 1),
+          fontFamily: data.fontFamily || "Arial",
+          fontSize: (data.fontSize || 80) * (window.devicePixelRatio || 1),
+          fontWeight: data.fontWeight || "normal",
+          fontStyle: data.fontStyle || "normal",
+          fill: data.fill || "#ffffff",
+          textAlign: data.textAlign || "center",
+          underline: data.underline || false,
+        });
+        fc.add(text);
+        fc.setActiveObject(text);
+        sync();
+        onSaveHistory();
+        pushHistory();
+      } else if (data.type === "image" && data.url) {
+        fabric.Image.fromURL(data.url, (img: any) => {
+          const maxSize = TEX_SIZE * 0.5;
+          const scale = Math.min(maxSize / (img.width || 1), maxSize / (img.height || 1));
+          img.set({ left: dropX, top: dropY, scaleX: scale, scaleY: scale, originX: "center", originY: "center" });
+          fc.add(img);
+          fc.setActiveObject(img);
+          sync();
+          onSaveHistory();
+          pushHistory();
+        });
+      }
+    } catch (err) {
+      console.error("Drop error:", err);
+    }
+  }, [fabricCanvasRef, onSaveHistory, pushHistory]);
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center" style={{ background: "#0a0a12" }}>
+    <div
+      className="relative w-full h-full"
+      style={{ background: "#0a0a12" }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleCanvasDrop}
+    >
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
 
-      {/* Visible Fabric.js overlay — positioned over the chest print area so users can
-          directly drag/resize/rotate their design elements while seeing the 3D shirt behind it. */}
-      <div
-        className="absolute pointer-events-auto"
-        style={{
-          width: "28%",
-          aspectRatio: "1 / 1",
-          top: "34%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          border: "1.5px dashed rgba(147,112,219,0.45)",
-          borderRadius: 8,
-          overflow: "visible",
-        }}
-      >
+      {/* Hidden Fabric canvas — texture source only, never visible */}
+      <div style={{ position: "absolute", top: -9999, left: -9999, pointerEvents: "none" }}>
         <canvas
-          ref={(el) => {
-            if (el && fabricOverlayElRef.current !== el) {
-              fabricOverlayElRef.current = el;
-            }
-          }}
-          style={{ width: "100%", height: "100%", display: isReady ? "block" : "none" }}
+          ref={(el) => { if (el && fabricOverlayElRef.current !== el) fabricOverlayElRef.current = el; }}
+          width={TEX_SIZE}
+          height={TEX_SIZE}
         />
       </div>
+
+      {/* Drop hint — only shows when dragging over */}
+      {isReady && isFrontFacing && (
+        <div
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          style={{ opacity: 0 }}
+          id="drop-hint"
+        >
+          <div style={{
+            background: "rgba(124,58,237,0.2)", border: "2px dashed rgba(124,58,237,0.6)",
+            borderRadius: 12, padding: "12px 24px", color: "#c4b5fd", fontSize: 14, fontWeight: 500,
+          }}>
+            Drop here to add to shirt
+          </div>
+        </div>
+      )}
 
       {!isReady && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">

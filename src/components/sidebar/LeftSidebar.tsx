@@ -11,6 +11,7 @@ import {
 import { TSHIRT_STYLES, SHIRT_COLORS, FONTS, getTshirtSVG } from "@/lib/tshirtData";
 import { TEMPLATE_DESIGNS, TEMPLATE_CATEGORIES } from "@/lib/templateDesigns";
 import { GarmentPickerModal } from "@/components/ui/GarmentPickerModal";
+import { GarmentThumbnail } from "@/components/ui/GarmentThumbnail";
 import type { SidebarTab } from "@/types";
 
 interface LeftSidebarProps {
@@ -34,7 +35,7 @@ const TABS = [
   { id: "templates" as SidebarTab, icon: Layout, label: "Templates" },
 ];
 
-function TemplateCard({ tmpl, onAdd }: { tmpl: any; onAdd: () => void }) {
+function TemplateCard({ tmpl, onAdd }: { tmpl: any; onAdd: () => void; key?: any }) {
   const [hovered, setHovered] = useState(false);
   return (
     <button onClick={onAdd} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
@@ -144,10 +145,13 @@ export function LeftSidebar({
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
             >
               <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+                className="w-12 h-12 rounded-lg overflow-hidden shrink-0 flex items-center justify-center"
                 style={{ background: "rgba(255,255,255,0.06)" }}
-                dangerouslySetInnerHTML={{ __html: getTshirtSVG(selectedStyle, "#d0d0d0") }}
-              />
+              >
+                <div style={{ transform: "scale(0.4)", transformOrigin: "center", width: 120, height: 120 }}>
+                  <GarmentThumbnail style={selectedStyle} size={120} />
+                </div>
+              </div>
               <div className="flex-1 text-left min-w-0">
                 <p className="text-[12px] font-semibold truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
                   {TSHIRT_STYLES.find(s => s.svgPath === selectedStyle)?.name || "Classic Crew"}
@@ -258,10 +262,23 @@ export function LeftSidebar({
                 <SectionLabel label="Recent uploads"/>
                 <div className="grid grid-cols-3 gap-1.5">
                   {uploadedFiles.map((item,i) => (
-                    <button key={i} onClick={() => onAddImage(item.file)} className="aspect-square rounded-lg overflow-hidden hover:opacity-80"
-                      style={{ border:"0.5px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.04)" }}>
+                    <div
+                      key={i}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", JSON.stringify({
+                          type: "image",
+                          url: item.url,
+                          name: item.name,
+                        }));
+                      }}
+                      onClick={() => onAddImage(item.file)}
+                      className="aspect-square rounded-lg overflow-hidden cursor-grab active:cursor-grabbing"
+                      style={{ border:"0.5px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.04)" }}
+                      title="Drag onto shirt or click to add"
+                    >
                       <img src={item.url} alt={item.name} className="w-full h-full object-contain p-1"/>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -272,30 +289,68 @@ export function LeftSidebar({
         {/* ── TEXT ── */}
         {activeTab === "text" && (
           <div className="p-3 sidebar-tab-content">
-            <SectionLabel label="Add Text"/>
-            <textarea value={textContent} onChange={e=>setTextContent(e.target.value)} rows={3}
-              placeholder="Enter your text..." className="w-full rounded-xl p-3 text-sm resize-none mb-3"
-              style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.85)", outline:"none" }}/>
-            <div className="mb-3">
-              <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Font</label>
-              <select value={fontFamily} onChange={e=>setFontFamily(e.target.value)} className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.8)", outline:"none" }}>
-                {FONTS.map(f => <option key={f} value={f} style={{ background:"#1a1a2e" }}>{f}</option>)}
-              </select>
-            </div>
-            <div className="mb-3">
-              <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Size: {fontSize}px</label>
-              <input type="range" min="10" max="120" value={fontSize} onChange={e=>setFontSize(Number(e.target.value))} className="w-full accent-violet-500"/>
-            </div>
-            <div className="mb-3">
-              <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Color</label>
-              <div className="flex items-center gap-2">
-                <input type="color" value={textColor} onChange={e=>setTextColor(e.target.value)} className="w-10 h-8 rounded cursor-pointer" style={{ border:"none" }}/>
-                <span className="text-xs font-mono" style={{ color:"rgba(255,255,255,0.5)" }}>{textColor}</span>
+            <SectionLabel label="Drag Text onto Shirt"/>
+            <p className="text-[11px] mb-3" style={{ color:"rgba(255,255,255,0.35)" }}>
+              Drag any text block directly onto the print area
+            </p>
+
+            {/* Draggable text chips */}
+            {[
+              { label: "Add Heading", fontSize: 64, fontWeight: "bold", sample: "HEADING" },
+              { label: "Add Subheading", fontSize: 40, fontWeight: "600", sample: "Subheading" },
+              { label: "Add Body Text", fontSize: 28, fontWeight: "normal", sample: "Body text here" },
+              { label: "Add Small Text", fontSize: 20, fontWeight: "normal", sample: "Small text" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData("text/plain", JSON.stringify({
+                    type: "text",
+                    content: item.sample,
+                    fontFamily,
+                    fontSize: item.fontSize,
+                    fontWeight: item.fontWeight,
+                    fontStyle: italic ? "italic" : "normal",
+                    fill: textColor,
+                    textAlign,
+                    underline,
+                  }));
+                }}
+                className="rounded-xl p-3 mb-2 cursor-grab active:cursor-grabbing flex items-center gap-3 transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "0.5px solid rgba(255,255,255,0.1)",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.15)"; (e.currentTarget as HTMLElement).style.border = "0.5px solid rgba(124,58,237,0.4)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; (e.currentTarget as HTMLElement).style.border = "0.5px solid rgba(255,255,255,0.1)"; }}
+              >
+                <span style={{ fontSize: Math.min(item.fontSize * 0.3, 22), fontWeight: item.fontWeight, color: "rgba(255,255,255,0.8)", lineHeight: 1 }}>A</span>
+                <div>
+                  <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{item.label}</p>
+                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Drag onto shirt</p>
+                </div>
+                <span className="ml-auto text-[16px]" style={{ color: "rgba(255,255,255,0.2)" }}>⠿</span>
               </div>
-            </div>
-            <div className="mb-4">
-              <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Style</label>
+            ))}
+
+            {/* Style controls */}
+            <div className="mt-3 pt-3" style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}>
+              <SectionLabel label="Text Style"/>
+              <div className="mb-3">
+                <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Font</label>
+                <select value={fontFamily} onChange={e=>setFontFamily(e.target.value)} className="w-full rounded-lg px-3 py-2 text-sm"
+                  style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.8)", outline:"none" }}>
+                  {FONTS.map(f => <option key={f} value={f} style={{ background:"#1a1a2e" }}>{f}</option>)}
+                </select>
+              </div>
+              <div className="mb-3">
+                <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Color</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={textColor} onChange={e=>setTextColor(e.target.value)} className="w-10 h-8 rounded cursor-pointer" style={{ border:"none" }}/>
+                  <span className="text-xs font-mono" style={{ color:"rgba(255,255,255,0.5)" }}>{textColor}</span>
+                </div>
+              </div>
               <div className="flex gap-1.5 flex-wrap">
                 {[{icon:Bold,k:"b",a:bold,t:()=>setBold(!bold)},{icon:Italic,k:"i",a:italic,t:()=>setItalic(!italic)},{icon:Underline,k:"u",a:underline,t:()=>setUnderline(!underline)}].map(({icon:Icon,k,a,t})=>(
                   <button key={k} onClick={t} className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
@@ -303,19 +358,8 @@ export function LeftSidebar({
                     <Icon size={14}/>
                   </button>
                 ))}
-                <div className="w-px h-9" style={{ background:"rgba(255,255,255,0.08)" }}/>
-                {[{icon:AlignLeft,a:"left"as const},{icon:AlignCenter,a:"center"as const},{icon:AlignRight,a:"right"as const}].map(({icon:Icon,a})=>(
-                  <button key={a} onClick={()=>setTextAlign(a)} className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
-                    style={{ background:textAlign===a?"rgba(124,58,237,0.25)":"rgba(255,255,255,0.06)", border:textAlign===a?"0.5px solid rgba(124,58,237,0.6)":"0.5px solid rgba(255,255,255,0.1)", color:textAlign===a?"#a78bfa":"rgba(255,255,255,0.5)" }}>
-                    <Icon size={14}/>
-                  </button>
-                ))}
               </div>
             </div>
-            <Button onPress={() => onAddText({ content:textContent||"Your text", fontFamily, fontSize, fontWeight:bold?"bold":"normal", fontStyle:italic?"italic":"normal", fill:textColor, textAlign, underline })}
-              className="w-full font-semibold text-white" style={{ background:"linear-gradient(135deg,#7c3aed,#4f46e5)" }} startContent={<Plus size={15}/>}>
-              Add to canvas
-            </Button>
           </div>
         )}
 
