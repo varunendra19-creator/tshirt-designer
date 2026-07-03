@@ -66,15 +66,16 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
             if (child.isMesh) {
               child.castShadow = true;
               child.receiveShadow = true;
-              // Apply color tint while keeping original texture
-              if (child.material) {
-                const mats = Array.isArray(child.material) ? child.material : [child.material];
-                mats.forEach((mat: any) => {
-                  mat.color = new THREE.Color(color);
-                  mat.needsUpdate = true;
-                });
+              // Replace with fresh MeshStandardMaterial — ignores any baked texture
+              // so shirt color always updates correctly from the color picker
+              child.material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(color),
+                roughness: 0.82,
+                metalness: 0.02,
+              });
+              if (!bodyMeshRef.current) {
+                bodyMeshRef.current = child;
               }
-              if (!bodyMeshRef.current) bodyMeshRef.current = child;
             }
           });
 
@@ -161,13 +162,13 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
 
     // Use lowerCanvasEl DIRECTLY as the Three.js texture source.
     // No intermediate offscreen canvas — eliminates all copy/scale bugs.
-    const lowerCanvas = (fc as any).lowerCanvasEl;
+    const lowerCanvas = fc.lowerCanvasEl;
     console.log("[ThreadCraft] Fabric lowerCanvasEl:", lowerCanvas?.width, "x", lowerCanvas?.height);
 
     (window as any).__fabricCanvas = fc;
 
     const tex = new THREE.CanvasTexture(lowerCanvas);
-    tex.flipY = true;
+    tex.flipY = false;
     try { tex.colorSpace = THREE.SRGBColorSpace; } catch {}
     tex.anisotropy = 8;
     canvasTextureRef.current = tex;
@@ -222,9 +223,9 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     // Place a flat plane ON the shirt front face, parented to the group
     // so it rotates with the shirt automatically — no DecalGeometry needed
     // Model is normalized to 2.2 units tall — hardcode generous plane size
-    const printW = 1.2;
-    const printH = 0.9;
-    const chestY = center.y - 0.35;  // lower to mid-chest
+    const printW = 1.4;  // ~64% of 2.2 unit wide shirt
+    const printH = 1.2;  // covers most of torso height
+    const chestY = center.y - 0.1;
     const frontZ = box.max.z + 0.05;
 
     const planeGeo = new THREE.PlaneGeometry(printW, printH, 8, 8);
@@ -336,7 +337,7 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
       controls.target.set(0, 0, 0);
       controls.update();
 
-      // Apply initial color tint
+      // Apply initial color
       group.traverse((c: any) => { if (c.isMesh && c.name !== "decal") { c.material.color = new THREE.Color(shirtColor); } });
 
       // Set ready FIRST so the overlay canvas div renders in DOM
@@ -407,12 +408,7 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
   useEffect(() => {
     if (!groupRef.current || !threeRef.current) return;
     const THREE = threeRef.current;
-    groupRef.current.traverse((c: any) => {
-      if (c.isMesh && c.name !== "decal") {
-        c.material.color = new THREE.Color(shirtColor);
-        c.material.needsUpdate = true;
-      }
-    });
+    groupRef.current.traverse((c: any) => { if (c.isMesh && c.name !== "decal") { c.material.color = new THREE.Color(shirtColor); c.material.needsUpdate = true; } });
   }, [shirtColor]);
 
   // Flip view side — also stop auto-rotate so the loop doesn't immediately overwrite this rotation
@@ -452,7 +448,7 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     const content = options.content.replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
     const text = new fabric.Textbox(content, {
       left: TEX_SIZE/2, top: TEX_SIZE/2, width: TEX_SIZE * 0.8, originX: "center", originY: "center",
-      fontFamily: options.fontFamily, fontSize: options.fontSize * 2, fontWeight: options.fontWeight,
+      fontFamily: options.fontFamily, fontSize: options.fontSize * 5, fontWeight: options.fontWeight,
       fontStyle: options.fontStyle, fill: options.fill, textAlign: options.textAlign, underline: options.underline,
     });
     fc.add(text); fc.setActiveObject(text); fc.renderAll(); updateTexture();
@@ -471,7 +467,7 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     for (const line of lines) {
       const tb = new fabric.Textbox(line.text, {
         width: maxW, originX: "center", originY: "top",
-        fontFamily: line.font, fontSize: line.size * 2, fontWeight: line.weight,
+        fontFamily: line.font, fontSize: line.size * 5, fontWeight: line.weight,
         fontStyle: line.style || "normal", fill: line.color, textAlign: "center", name: "template",
       });
       textObjs.push(tb);
@@ -537,13 +533,6 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
   // Handle drop directly onto the 3D shirt canvas
   const handleCanvasDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
-    // Stop auto-rotate when user drops design
-    isAutoRef.current = false;
-    setIsAuto(false);
-    if (controlsRef.current) {
-      controlsRef.current.enabled = false;
-      setTimeout(() => { if (controlsRef.current) controlsRef.current.enabled = true; }, 300);
-    }
     const raw = e.dataTransfer.getData("text/plain");
     if (!raw) return;
 
@@ -553,8 +542,9 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     const canvasEl = mountRef.current;
     if (!canvasEl) return;
     const rect = canvasEl.getBoundingClientRect();
-    const dropX = ((e.clientX - rect.left) / rect.width) * TEX_SIZE;
-    const dropY = ((e.clientY - rect.top) / rect.height) * TEX_SIZE;
+    const dpr = window.devicePixelRatio || 1;
+    const dropX = ((e.clientX - rect.left) / rect.width) * TEX_SIZE * dpr;
+    const dropY = ((e.clientY - rect.top) / rect.height) * TEX_SIZE * dpr;
 
     const sync = () => {
       fc.renderAll();
@@ -576,9 +566,9 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
           top: dropY,
           originX: "center",
           originY: "center",
-          width: TEX_SIZE * 0.6,
+          width: TEX_SIZE * 0.6 * (window.devicePixelRatio || 1),
           fontFamily: data.fontFamily || "Arial",
-          fontSize: data.fontSize ? data.fontSize / 2 : 40,
+          fontSize: (data.fontSize || 80) * (window.devicePixelRatio || 1),
           fontWeight: data.fontWeight || "normal",
           fontStyle: data.fontStyle || "normal",
           fill: data.fill || "#ffffff",
@@ -607,38 +597,16 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     }
   }, [fabricCanvasRef, onSaveHistory, pushHistory]);
 
-  // Forward mouse events from 3D canvas to Fabric canvas for editing
-  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    const fc = fabricCanvasRef.current;
-    if (!fc) return;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * TEX_SIZE;
-    const y = ((e.clientY - rect.top) / rect.height) * TEX_SIZE;
-    // Simulate click on Fabric canvas at the mapped position
-    fc.discardActiveObject();
-    const found = fc.getObjects().find((obj: any) => obj.containsPoint({ x, y }));
-    if (found) {
-      fc.setActiveObject(found);
-      onSelectObject(found);
-      pauseAutoRotate();
-    } else {
-      onSelectObject(null);
-    }
-    fc.renderAll();
-    if (syncToTextureRef.current) syncToTextureRef.current();
-  }, [fabricCanvasRef, onSelectObject, pauseAutoRotate]);
-
   return (
     <div
       className="relative w-full h-full"
       style={{ background: "#0a0a12" }}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleCanvasDrop}
-      onClick={handleCanvasClick}
     >
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
 
-      {/* Fabric canvas — offscreen, used as texture source only */}
+      {/* Hidden Fabric canvas — texture source only, never visible */}
       <div style={{ position: "absolute", top: -9999, left: -9999, pointerEvents: "none" }}>
         <canvas
           ref={(el) => { if (el && fabricOverlayElRef.current !== el) fabricOverlayElRef.current = el; }}
