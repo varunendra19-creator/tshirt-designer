@@ -181,6 +181,18 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     syncToTextureRef.current = syncToTexture;
     (window as any).__fabricSyncFn = syncToTexture;
 
+    // Scale Fabric's pointer coordinates to match the CSS display size of the overlay
+    // This runs after React renders the overlay div
+    setTimeout(() => {
+      const el = (fc as any).wrapperEl || fabricOverlayElRef.current?.parentElement;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0) {
+          fc.setDimensions({ width: rect.width, height: rect.height }, { cssOnly: true });
+        }
+      }
+    }, 200);
+
     fc.on("selection:created", (e: any) => { isAutoRef.current = false; setIsAuto(false); onSelectObject(e.selected?.[0]); });
     fc.on("selection:updated", (e: any) => { isAutoRef.current = false; setIsAuto(false); onSelectObject(e.selected?.[0]); });
     fc.on("selection:cleared", () => onSelectObject(null));
@@ -550,9 +562,10 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     const fc = fabricCanvasRef.current;
     if (!fc) return;
 
-    const canvasEl = mountRef.current;
-    if (!canvasEl) return;
-    const rect = canvasEl.getBoundingClientRect();
+    // Use the fabric overlay element for coordinate mapping
+    const overlayEl = fabricOverlayElRef.current?.parentElement || mountRef.current;
+    if (!overlayEl) return;
+    const rect = overlayEl.getBoundingClientRect();
     const dropX = ((e.clientX - rect.left) / rect.width) * TEX_SIZE;
     const dropY = ((e.clientY - rect.top) / rect.height) * TEX_SIZE;
 
@@ -638,14 +651,46 @@ export const Live3DCanvas = forwardRef<any, Live3DCanvasProps>(({
     >
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
 
-      {/* Fabric canvas — offscreen, used as texture source only */}
-      <div style={{ position: "absolute", top: -9999, left: -9999, pointerEvents: "none" }}>
-        <canvas
-          ref={(el) => { if (el && fabricOverlayElRef.current !== el) fabricOverlayElRef.current = el; }}
-          width={TEX_SIZE}
-          height={TEX_SIZE}
-        />
-      </div>
+      {/* Fabric canvas overlay — transparent background, visible selection handles */}
+      {isReady && (
+        <div
+          style={{
+            position: "absolute",
+            top: "28%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "45%",
+            aspectRatio: "1",
+            pointerEvents: isFrontFacing ? "auto" : "none",
+            opacity: isFrontFacing ? 1 : 0,
+            transition: "opacity 0.2s",
+            zIndex: 10,
+          }}
+        >
+          <canvas
+            ref={(el) => { if (el && fabricOverlayElRef.current !== el) fabricOverlayElRef.current = el; }}
+            style={{ width: "100%", height: "100%", display: "block", background: "transparent" }}
+          />
+          {/* Dashed border hint */}
+          {isFrontFacing && (
+            <div style={{
+              position: "absolute", inset: 0,
+              border: "1px dashed rgba(147,112,219,0.2)",
+              borderRadius: 4, pointerEvents: "none",
+            }} />
+          )}
+        </div>
+      )}
+      {/* Pre-init hidden canvas */}
+      {!isReady && (
+        <div style={{ position: "absolute", top: -9999, left: -9999, pointerEvents: "none" }}>
+          <canvas
+            ref={(el) => { if (el && fabricOverlayElRef.current !== el) fabricOverlayElRef.current = el; }}
+            width={TEX_SIZE}
+            height={TEX_SIZE}
+          />
+        </div>
+      )}
 
       {/* Drop hint — only shows when dragging over */}
       {isReady && isFrontFacing && (
