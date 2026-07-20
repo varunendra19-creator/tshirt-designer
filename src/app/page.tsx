@@ -28,13 +28,27 @@ export default function Home() {
 
   const canvasRef = useRef<any>(null);
 
+  // Bumped alongside the object so a re-render still happens while dragging: Fabric
+  // mutates the SAME object in place, so setActiveObject alone is a no-op to React
+  // (Object.is passes) and the properties panel would keep showing stale numbers.
+  const [, bumpProps] = useState(0);
   const handleSelectObject = useCallback((obj: any) => {
     setActiveObject(obj);
+    bumpProps(n => n + 1);
   }, []);
 
   const handleSaveHistory = useCallback(() => {
     setHistoryLength(h => h + 1);
     setHistoryPos(p => p + 1);
+  }, []);
+
+  // Left-sidebar font/colour/style controls, applied to the live selection
+  const handleStyleText = useCallback((patch: Record<string, any>) => {
+    return canvasRef.current?.styleActiveObject(patch) ?? false;
+  }, []);
+
+  const handleScale = useCallback((percent: number) => {
+    canvasRef.current?.scaleActiveObject(percent);
   }, []);
 
   const handleAddImage = useCallback((file: File) => { canvasRef.current?.addImage(file); }, []);
@@ -173,6 +187,8 @@ export default function Home() {
           onShirtScale={setShirtScale}
           onShirtReset={() => { setShirtRotation(0); setShirtFlipX(false); setShirtFlipY(false); setShirtScale(1); }}
           customColor={customColor} onCustomColor={setCustomColor}
+          onStyleText={handleStyleText}
+          hasSelection={!!activeObject}
         />
         <div className="flex-1 overflow-hidden">
           <Live3DCanvas
@@ -186,7 +202,8 @@ export default function Home() {
         </div>
         <RightSidebar
           activeObject={activeObject} objProps={objProps}
-          onUpdateProp={updateProp} onDelete={handleDelete} onDuplicate={handleDuplicate}
+          onUpdateProp={updateProp} onScale={handleScale}
+          onDelete={handleDelete} onDuplicate={handleDuplicate}
           onCenterH={centerH} onCenterV={centerV}
           onBringToFront={bringToFront} onSendToBack={sendToBack}
           onBringForward={bringForward} onSendBackward={sendBackward}
