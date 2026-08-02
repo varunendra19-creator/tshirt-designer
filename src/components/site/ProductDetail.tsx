@@ -227,6 +227,21 @@ export function ProductDetail({ product }: { product: Product }) {
       </div>
     </div>
     <ProductReviews productId={product.id} />
+
+    {/* Sticky mobile add-to-cart bar — quick add without scrolling back up */}
+    <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-black/10 bg-white/95 p-3 backdrop-blur md:hidden">
+      <div className="min-w-0">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-display text-lg font-extrabold">{inr(product.price)}</span>
+          {off > 0 && <span className="text-xs text-[var(--ink-soft)] line-through">{inr(product.compareAt!)}</span>}
+        </div>
+        <span className="block truncate text-[11px] text-[var(--ink-soft)]">{size ? `Size ${size} · ${colorName(color)}` : "Pick a size ↑"}</span>
+      </div>
+      <button onClick={onAdd} disabled={selStock === 0}
+        className="ml-auto shrink-0 rounded-xl bg-[var(--lime)] px-6 py-3 text-sm font-bold text-[var(--ink)] transition-transform active:scale-[0.99] disabled:opacity-50">
+        {selStock === 0 ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
+      </button>
+    </div>
     </>
   );
 }

@@ -51,7 +51,7 @@ export function ProductCard({ p }: { p: Product }) {
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           aria-pressed={wished}
           onClick={toggleWish}
-          className={`absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur transition-colors hover:text-[var(--coral)] ${wished ? "text-[var(--coral)]" : "text-[var(--ink)]"}`}
+          className={`absolute right-2.5 top-2.5 grid h-9 w-9 place-items-center rounded-full bg-white/90 shadow backdrop-blur transition-colors hover:text-[var(--coral)] ${wished ? "text-[var(--coral)]" : "text-[var(--ink)]"}`}
         >
           <Icon name="heart" className="h-4 w-4" style={wished ? { fill: "var(--coral)" } : undefined} />
         </button>
@@ -74,11 +74,11 @@ export function ProductCard({ p }: { p: Product }) {
           <button
             onClick={quickAdd}
             aria-label={`Add ${p.name} to cart`}
-            className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-white shadow-sm transition-transform hover:scale-110 ${
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-white shadow-sm transition-transform hover:scale-110 ${
               added ? "bg-[var(--mint)]" : "bg-[var(--primary)]"
             }`}
           >
-            <Icon name={added ? "check" : "plus"} className="h-3.5 w-3.5" />
+            <Icon name={added ? "check" : "plus"} className="h-4 w-4" />
           </button>
         </div>
       </div>

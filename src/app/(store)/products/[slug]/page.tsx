@@ -80,7 +80,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   };
 
   return (
-    <section className="mx-auto max-w-full px-5 py-8 md:py-12">
+    <section className="mx-auto max-w-full px-5 pt-8 pb-24 md:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
       <nav aria-label="Breadcrumb" className="mb-5 text-xs text-[var(--ink-soft)]">
