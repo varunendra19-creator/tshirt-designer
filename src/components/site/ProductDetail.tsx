@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/catalog";
 import { colorName } from "@/lib/catalog";
@@ -35,6 +35,16 @@ export function ProductDetail({ product }: { product: Product }) {
   const [stock, setStock] = useState<Record<string, number>>({});
   const off = product.compareAt ? Math.round((1 - product.price / product.compareAt) * 100) : 0;
 
+  // lightweight toast + a target to scroll to when a required choice is missing
+  const [toast, setToast] = useState<string | null>(null);
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const showToast = (msg: string) => {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2500);
+  };
+
   useEffect(() => { trackView(product.id); }, [product.id]); // recently-viewed history
   useEffect(() => { fetchStock(product.id).then(setStock); }, [product.id]); // per-variant stock
 
@@ -47,17 +57,20 @@ export function ProductDetail({ product }: { product: Product }) {
   useEffect(() => { setQty((q) => Math.min(q, maxQty)); }, [maxQty]);
 
   const doAdd = (): boolean => {
-    if (!size) { setErr(true); return false; }
-    if (selStock === 0) return false;                       // out of stock
+    if (!size) {                                            // no size → toast + scroll to the size picker
+      setErr(true);
+      showToast("Please select a size");
+      sizeRef.current?.scrollIntoView({ behavior: "auto", block: "center" });
+      return false;
+    }
+    if (selStock === 0) { showToast("Out of stock in this colour & size"); return false; }
     add({ id: product.id, size, color, qty: Math.min(qty, maxQty) });
     return true;
   };
 
   const onAdd = () => {
-    if (doAdd()) {
-      setAdded(true);
-      setTimeout(() => setAdded(false), 1600);
-    }
+    if (added) { router.push("/cart"); return; }   // already added → go to the cart page
+    if (doAdd()) setAdded(true);                    // added → button switches to "Go to Cart"
   };
   const onBuy = () => {
     if (doAdd()) router.push("/checkout");
@@ -139,7 +152,7 @@ export function ProductDetail({ product }: { product: Product }) {
               return (
                 <button
                   key={s}
-                  onClick={() => { setColor(s); setHeroOverride(product.colorImages?.[s] || null); }}
+                  onClick={() => { setColor(s); setHeroOverride(product.colorImages?.[s] || null); setAdded(false); }}
                   aria-label={`${colorName(s)}${soldOut ? " (sold out)" : ""}`}
                   title={soldOut ? "Sold out" : colorName(s)}
                   className={`relative h-9 w-9 rounded-full ring-2 ring-offset-2 ring-offset-[var(--paper)] transition-transform hover:scale-105 ${
@@ -155,7 +168,7 @@ export function ProductDetail({ product }: { product: Product }) {
         </div>
 
         {/* Size */}
-        <div className="mt-6">
+        <div ref={sizeRef} className="mt-6 scroll-mt-24">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold">Size</p>
             <span className="text-xs text-[var(--ink-soft)]">Size guide</span>
@@ -167,7 +180,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 <button
                   key={s}
                   disabled={oos}
-                  onClick={() => { setSize(s); setErr(false); }}
+                  onClick={() => { setSize(s); setErr(false); setAdded(false); }}
                   className={`h-11 min-w-11 rounded-xl border px-3 text-sm font-semibold transition-colors ${
                     oos
                       ? "cursor-not-allowed border-black/10 bg-[var(--paper-2)] text-[var(--ink-soft)] line-through"
@@ -194,16 +207,26 @@ export function ProductDetail({ product }: { product: Product }) {
         {/* Qty + actions */}
         <div className="mt-6 flex items-center gap-3">
           <div className="flex items-center rounded-xl border border-black/15 bg-white">
-            <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="grid h-11 w-11 place-items-center text-lg" aria-label="Decrease">−</button>
+            <button onClick={() => { setQty((q) => Math.max(1, q - 1)); setAdded(false); }} className="grid h-11 w-11 place-items-center text-lg" aria-label="Decrease">−</button>
             <span className="w-8 text-center text-sm font-semibold">{qty}</span>
-            <button onClick={() => setQty((q) => Math.min(maxQty, q + 1))} className="grid h-11 w-11 place-items-center text-lg disabled:opacity-40" disabled={qty >= maxQty} aria-label="Increase">+</button>
+            <button onClick={() => { setQty((q) => Math.min(maxQty, q + 1)); setAdded(false); }} className="grid h-11 w-11 place-items-center text-lg disabled:opacity-40" disabled={qty >= maxQty} aria-label="Increase">+</button>
           </div>
           <button
             onClick={onAdd}
             disabled={selStock === 0}
-            className="sheen flex-1 rounded-xl bg-[var(--lime)] py-3.5 text-sm font-bold text-[var(--ink)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`flex-1 rounded-xl py-3.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${
+              added ? "bg-[var(--primary)] text-white" : "sheen bg-[var(--lime)] text-[var(--ink)]"
+            }`}
           >
-            {selStock === 0 ? "Out of Stock" : added ? "Added to cart ✓" : "Add to Cart"}
+            {selStock === 0 ? (
+              "Out of Stock"
+            ) : added ? (
+              <span className="inline-flex items-center justify-center gap-1.5">
+                Go to Cart <Icon name="arrow" className="h-4 w-4" />
+              </span>
+            ) : (
+              "Add to Cart"
+            )}
           </button>
         </div>
         <button
@@ -238,10 +261,25 @@ export function ProductDetail({ product }: { product: Product }) {
         <span className="block truncate text-[11px] text-[var(--ink-soft)]">{size ? `Size ${size} · ${colorName(color)}` : "Pick a size ↑"}</span>
       </div>
       <button onClick={onAdd} disabled={selStock === 0}
-        className="ml-auto shrink-0 rounded-xl bg-[var(--lime)] px-6 py-3 text-sm font-bold text-[var(--ink)] transition-transform active:scale-[0.99] disabled:opacity-50">
-        {selStock === 0 ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
+        className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-xl px-6 py-3 text-sm font-bold transition-transform active:scale-[0.99] disabled:opacity-50 ${
+          added ? "bg-[var(--primary)] text-white" : "bg-[var(--lime)] text-[var(--ink)]"
+        }`}>
+        {selStock === 0 ? "Out of Stock" : added ? <>Go to Cart <Icon name="arrow" className="h-4 w-4" /></> : "Add to Cart"}
       </button>
     </div>
+
+    {/* Toast — floats above the sticky bar so it's visible no matter where the shopper tapped */}
+    {toast && (
+      <div
+        role="status"
+        aria-live="polite"
+        className="fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 animate-[fadeSlideIn_0.25s_ease] whitespace-nowrap rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-8px_rgba(0,0,0,0.5)] md:bottom-8">
+        <span className="inline-flex items-center gap-2">
+          <span className="grid h-4 w-4 place-items-center rounded-full bg-[var(--coral)] text-[10px] font-black">!</span>
+          {toast}
+        </span>
+      </div>
+    )}
     </>
   );
 }
