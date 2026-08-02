@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "./SiteHeader";
 import { Icon } from "@/components/home/primitives";
 
@@ -48,8 +49,11 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
 const PAYMENTS = ["VISA", "Mastercard", "UPI", "Paytm", "GPay"];
 
 export function SiteFooter() {
+  const pathname = usePathname();
+  // Cart uses a fixed app-style layout on phones, so hide the footer there on mobile.
+  const hideOnMobile = pathname === "/cart";
   return (
-    <footer className="border-t border-black/5 bg-[var(--paper-2)]">
+    <footer className={`border-t border-black/5 bg-[var(--paper-2)] ${hideOnMobile ? "hidden md:block" : ""}`}>
       <div className="mx-auto max-w-full px-5 pt-14 pb-8">
         <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
           <div>
