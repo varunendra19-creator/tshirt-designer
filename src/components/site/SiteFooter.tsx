@@ -50,8 +50,9 @@ const PAYMENTS = ["VISA", "Mastercard", "UPI", "Paytm", "GPay"];
 
 export function SiteFooter() {
   const pathname = usePathname();
-  // Cart uses a fixed app-style layout on phones, so hide the footer there on mobile.
-  const hideOnMobile = pathname === "/cart";
+  // Cart & checkout use app-style layouts with a pinned bottom bar on phones,
+  // so hide the footer there on mobile (it competes with the sticky CTA).
+  const hideOnMobile = pathname === "/cart" || pathname === "/checkout";
   return (
     <footer className={`border-t border-black/5 bg-[var(--paper-2)] ${hideOnMobile ? "hidden md:block" : ""}`}>
       <div className="mx-auto max-w-full px-5 pt-14 pb-8">
