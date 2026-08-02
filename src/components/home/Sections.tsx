@@ -488,10 +488,12 @@ function ProductRow({ items }: { items: typeof TRENDING }) {
 /* ---- 7. Trending -------------------------------------------------------- */
 export function Trending() {
   return (
-    <section id="trending" className="mx-auto max-w-full px-5 pt-6 pb-2">
+    <section id="trending" className="w-full pt-6 pb-2 md:px-5">
       <Reveal>
-        <Head title="Trending Now" emoji="🔥" action={{ label: "View All", href: "/shop" }} />
-        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="px-3 md:px-0">
+          <Head title="Trending Now" emoji="🔥" action={{ label: "View All", href: "/shop" }} />
+        </div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-6 px-3 sm:grid-cols-3 md:gap-x-4 md:px-0 lg:grid-cols-6">
           {TRENDING.map((p) => (
             <ProductCard key={p.id} p={p} />
           ))}
@@ -504,9 +506,9 @@ export function Trending() {
 /* ---- 8. Outfit inspiration --------------------------------------------- */
 export function CampusLooks() {
   return (
-    <section id="campus-looks" className="mx-auto max-w-full px-5 pt-2 pb-8">
+    <section id="campus-looks" className="w-full pt-2 pb-8 md:px-5">
       <Reveal>
-        <div className="mb-5 flex items-end justify-between gap-4">
+        <div className="mb-5 flex items-end justify-between gap-4 px-3 md:px-0">
           <div>
             <h2 className="font-display text-[clamp(1.4rem,3vw,2rem)] font-extrabold text-[var(--ink)]">Campus Looks</h2>
             <p className="mt-0.5 text-sm text-[var(--ink-soft)]">Style Inspo for Your Everyday Life</p>
@@ -515,7 +517,7 @@ export function CampusLooks() {
             View All <Icon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 px-3 sm:grid-cols-3 md:gap-4 md:px-0 lg:grid-cols-6">
           {CAMPUS_LOOKS.map((o) => (
             <Link key={o.label} href="/shop" className="group relative block aspect-[3/4] overflow-hidden rounded-2xl border border-black/5">
               <Img src={img(o.key)} alt={o.label} tone="linear-gradient(150deg,var(--primary),var(--aqua))" label={o.label} className="absolute inset-0 h-full w-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
@@ -666,9 +668,9 @@ export function Colleges() {
 /* ---- 12. Newsletter ----------------------------------------------------- */
 export function Newsletter() {
   return (
-    <section id="newsletter" className="mx-auto max-w-full px-5 py-10">
+    <section id="newsletter" className="w-full py-10 md:px-5">
       <Reveal>
-        <div className="relative flex min-h-[150px] items-center overflow-hidden rounded-[1.5rem] text-white shadow-[0_18px_44px_-20px_rgba(124,58,237,0.5)]" style={{ background: "var(--grad-band)" }}>
+        <div className="relative flex min-h-[150px] items-center overflow-hidden text-white shadow-[0_18px_44px_-20px_rgba(124,58,237,0.5)] md:rounded-[1.5rem]" style={{ background: "var(--grad-band)" }}>
           {/* decorative sparkles */}
           <Icon name="sparkle" className="pointer-events-none absolute left-[42%] top-4 h-4 w-4 text-white/25" />
           <Icon name="sparkle" className="pointer-events-none absolute left-[58%] bottom-5 h-3 w-3 text-white/25" />
