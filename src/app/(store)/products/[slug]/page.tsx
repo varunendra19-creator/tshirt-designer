@@ -35,13 +35,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await getDbProduct(params.slug);
   if (!product) notFound();
-  const related = await getDbRelated(product);
   const url = `${SITE}/products/${product.id}`;
 
-  // Structured-data rating uses REAL buyer reviews only (never the editable
-  // display numbers), so Google never sees a fabricated aggregateRating.
-  const realReviews = await getDbProductReviewStats(product.id);
-  const inStock = await getDbProductInStock(product.id);
+  // Fetch related + real-review stats + stock in parallel (they're independent)
+  // so the page renders faster. Structured-data rating uses REAL buyer reviews
+  // only (never the editable display numbers), so Google never sees a fake rating.
+  const [related, realReviews, inStock] = await Promise.all([
+    getDbRelated(product),
+    getDbProductReviewStats(product.id),
+    getDbProductInStock(product.id),
+  ]);
   // priceValidUntil ~1 year out (Google recommends the field on Offer).
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 

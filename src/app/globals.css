@@ -6,6 +6,17 @@
   box-sizing: border-box;
 }
 
+/* Top route-progress bar: grows toward ~92% while a page loads, then unmounts. */
+@keyframes route-bar-grow {
+  0% { width: 0%; }
+  25% { width: 45%; }
+  55% { width: 70%; }
+  100% { width: 92%; }
+}
+.route-bar {
+  animation: route-bar-grow 8s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+
 /* The store is a light-themed UI. Pin the color-scheme to light so the browser
    renders native form controls (inputs, selects, textareas, checkboxes) with a
    light background + dark text even when the user's OS is in dark mode —

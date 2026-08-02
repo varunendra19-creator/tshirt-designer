@@ -3,6 +3,7 @@ import { Inter, Bricolage_Grotesque, Anton } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { safeJsonLd } from "@/lib/jsonld";
+import { RouteProgress } from "@/components/site/RouteProgress";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 // Body: Inter. Headings: Bricolage Grotesque — distinctive, premium-editorial.
@@ -71,6 +72,7 @@ export default function RootLayout({
   return (
     <html lang="en-IN" className="dark">
       <body className={`${inter.className} ${inter.variable} ${interBody.variable} ${bricolage.variable} ${anton.variable}`}>
+        <RouteProgress />
         <Providers>{children}</Providers>
         <script
           type="application/ld+json"
