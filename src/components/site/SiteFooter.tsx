@@ -69,20 +69,23 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {COLUMNS.map((col) => (
-            <div key={col.title}>
-              <h4 className="font-display text-sm font-bold text-[var(--ink)]">{col.title}</h4>
-              <ul className="mt-4 space-y-2.5">
-                {col.links.map((l) => (
-                  <li key={l.label}>
-                    <Link href={l.href} className="text-sm text-[var(--ink-2)] transition-colors hover:text-[var(--primary)]">
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Menu columns — horizontal swiper on mobile, grid cells on desktop */}
+          <div className="flex snap-x gap-8 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:contents lg:overflow-visible">
+            {COLUMNS.map((col) => (
+              <div key={col.title} className="w-[42%] shrink-0 snap-start lg:w-auto lg:shrink">
+                <h4 className="font-display text-sm font-bold text-[var(--ink)]">{col.title}</h4>
+                <ul className="mt-4 space-y-2.5">
+                  {col.links.map((l) => (
+                    <li key={l.label}>
+                      <Link href={l.href} className="text-sm text-[var(--ink-2)] transition-colors hover:text-[var(--primary)]">
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-black/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
