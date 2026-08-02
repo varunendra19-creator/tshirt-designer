@@ -87,13 +87,13 @@ export function Hero() {
             </Link>
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center gap-2">
+          <div className="-mx-6 mt-6 flex items-center gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:mt-7 lg:flex-wrap lg:overflow-visible lg:px-0">
             {HERO_TRUST.map((t, i) => {
               const s = CHIP_STYLES[i % CHIP_STYLES.length];
               return (
                 <span
                   key={t.text}
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold"
+                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold"
                   style={{ background: s.bg, color: s.fg }}
                 >
                   <Icon name={t.icon} className="h-3.5 w-3.5" />
