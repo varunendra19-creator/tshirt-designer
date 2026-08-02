@@ -453,17 +453,20 @@ export function CustomBuilder() {
 /* ---- 6. Trust icons ----------------------------------------------------- */
 export function TrustIcons() {
   return (
-    <section id="trust" className="mx-auto max-w-full px-5 pt-1 pb-4">
-      <div className="grid grid-cols-2 items-center gap-x-4 gap-y-6 rounded-2xl bg-[#f1ecfb] px-6 py-6 sm:grid-cols-3 lg:grid-cols-5">
-        {TRUST_ICONS.map((t) => (
-          <div key={t.title} className="flex items-center justify-center gap-3">
-            <Icon name={t.icon} className="h-8 w-8 shrink-0 text-[var(--primary)]" />
-            <span>
-              <span className="block text-[13px] font-bold leading-tight text-[var(--ink)]">{t.title}</span>
-              <span className="block text-xs text-[var(--ink-soft)]">{t.sub}</span>
-            </span>
-          </div>
-        ))}
+    <section id="trust" className="w-full pt-1 pb-4 md:px-5">
+      <div className="bg-[#f1ecfb] px-4 py-5 md:rounded-2xl md:px-6 md:py-6">
+        {/* Mobile: one-line horizontal swiper. Desktop: 5-up grid. */}
+        <div className="-mx-4 flex snap-x snap-mandatory items-center gap-5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:gap-x-4 md:gap-y-6 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-5">
+          {TRUST_ICONS.map((t) => (
+            <div key={t.title} className="flex shrink-0 snap-start items-center gap-3 md:shrink md:justify-center">
+              <Icon name={t.icon} className="h-8 w-8 shrink-0 text-[var(--primary)]" />
+              <span className="whitespace-nowrap md:whitespace-normal">
+                <span className="block text-[13px] font-bold leading-tight text-[var(--ink)]">{t.title}</span>
+                <span className="block text-xs text-[var(--ink-soft)]">{t.sub}</span>
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
