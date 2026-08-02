@@ -157,7 +157,7 @@ function ProductForm({ product, onSave, onCancel }: { product: Row | null; onSav
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">🎨</div>
             <div>
               <h3 className="font-display text-lg font-extrabold leading-tight">{isNew ? "New product" : `Edit ${product!.name}`}</h3>
-              <p className="text-[11px] text-[var(--ink-soft)]">Live preview updates as you edit →</p>
+              <p className="hidden text-[11px] text-[var(--ink-soft)] lg:block">Live preview updates as you edit →</p>
             </div>
           </div>
           <button onClick={onCancel} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-full text-[var(--ink-soft)] hover:bg-black/5">✕</button>

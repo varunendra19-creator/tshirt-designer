@@ -91,7 +91,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* mobile top nav */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-1 overflow-x-auto border-b bg-white px-3 py-2 md:hidden" style={{ borderColor: "var(--line)" }}>
           {NAV.map((n) => {
             const active = n.exact ? pathname === n.href : pathname.startsWith(n.href);

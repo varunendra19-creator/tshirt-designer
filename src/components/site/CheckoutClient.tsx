@@ -264,10 +264,10 @@ export function CheckoutClient() {
     }`;
 
   return (
-    <section className="mx-auto max-w-full px-5 py-10 md:py-14">
+    <section className="mx-auto max-w-full px-5 pt-10 pb-28 md:py-14">
       <h1 className="font-display text-[clamp(1.9rem,4.5vw,3rem)] font-extrabold leading-none">Checkout</h1>
 
-      <form onSubmit={placeOrder} className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+      <form id="checkout-form" onSubmit={placeOrder} className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         {/* Left: address + payment */}
         <div className="space-y-8">
           <div>
@@ -391,6 +391,15 @@ export function CheckoutClient() {
           </div>
         </div>
       </form>
+
+      {/* Sticky mobile checkout bar — pay without scrolling to the bottom */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white/95 p-3 backdrop-blur md:hidden">
+        <button type="submit" form="checkout-form" disabled={submitting}
+          className="flex w-full items-center justify-between rounded-xl bg-[var(--lime)] px-5 py-3.5 text-sm font-bold text-[var(--ink)] transition-transform active:scale-[0.99] disabled:opacity-60">
+          <span>{submitting ? "Placing order…" : "Place Order"}</span>
+          <span className="font-display text-base font-extrabold">{inr(total)}</span>
+        </button>
+      </div>
 
       {/* ── "WHAT YOU'RE PAYING FOR" POPUP — every side, on the shirt ── */}
       <DesignPreviewModal view={zoom} onClose={() => setZoom(null)} />
