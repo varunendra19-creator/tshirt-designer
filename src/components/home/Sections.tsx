@@ -163,10 +163,10 @@ const scrollRow = "flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-w
 
 export function ShowcaseRow() {
   return (
-    <section id="showcase" className="mx-auto max-w-full px-5 pt-2 pb-2">
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr_1.15fr]">
+    <section id="showcase" className="w-full pt-2 pb-2 md:px-5">
+      <div className="grid gap-3 md:gap-6 lg:grid-cols-[1.4fr_1fr_1.15fr]">
         {/* Best Sellers */}
-        <Reveal className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
+        <Reveal className="min-w-0 border-y border-black/5 bg-white p-4 shadow-sm md:rounded-2xl md:border">
           <ColHead title="Best Sellers" href="/shop" accent="linear-gradient(90deg,var(--primary),#a855f7)" />
           <div className={scrollRow}>
             {TRENDING.map((p) => (
@@ -178,7 +178,7 @@ export function ShowcaseRow() {
         </Reveal>
 
         {/* Outfit Inspiration */}
-        <Reveal delay={80} className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
+        <Reveal delay={80} className="min-w-0 border-y border-black/5 bg-white p-4 shadow-sm md:rounded-2xl md:border">
           <ColHead title="Outfit Inspiration" href="/shop" accent="linear-gradient(90deg,var(--aqua),#0891b2)" />
           <div className="grid grid-cols-3 gap-2">
             {OUTFITS.map((o) => (
@@ -195,7 +195,7 @@ export function ShowcaseRow() {
         </Reveal>
 
         {/* New Arrivals */}
-        <Reveal delay={160} className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
+        <Reveal delay={160} className="min-w-0 border-y border-black/5 bg-white p-4 shadow-sm md:rounded-2xl md:border">
           <ColHead title="New Arrivals" href="/shop" accent="linear-gradient(90deg,var(--mint),#10b981)" />
           <div className={scrollRow}>
             {NEW_ARRIVALS.map((p) => (
