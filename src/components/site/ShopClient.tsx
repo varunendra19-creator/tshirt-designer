@@ -75,17 +75,19 @@ export function ShopClient({ products = [] }: { products?: Product[] }) {
         <span className="text-[var(--ink)]">{heading}</span>
       </nav>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-[clamp(1.9rem,4.5vw,3rem)] font-extrabold leading-none">
-          {heading}
-        </h1>
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-[var(--ink-soft)]">{items.length} items</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+        <div>
+          <h1 className="font-display text-[clamp(1.9rem,4.5vw,3rem)] font-extrabold leading-none">
+            {heading}
+          </h1>
+          <span className="mt-2 block text-sm text-[var(--ink-soft)]">{items.length} items</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
           <select
             value={priceBand}
             onChange={(e) => setPriceBand(e.target.value)}
             aria-label="Filter by price"
-            className="rounded-full border border-black/15 bg-white px-4 py-2 text-sm font-medium outline-none focus:border-[var(--green)]"
+            className="min-w-0 flex-1 rounded-full border border-black/15 bg-white px-4 py-2.5 text-sm font-medium outline-none focus:border-[var(--green)] sm:flex-none"
           >
             {PRICE_BANDS.map((b) => (
               <option key={b.id} value={b.id}>{b.label}</option>
@@ -95,7 +97,7 @@ export function ShopClient({ products = [] }: { products?: Product[] }) {
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             aria-label="Sort"
-            className="rounded-full border border-black/15 bg-white px-4 py-2 text-sm font-medium outline-none focus:border-[var(--green)]"
+            className="min-w-0 flex-1 rounded-full border border-black/15 bg-white px-4 py-2.5 text-sm font-medium outline-none focus:border-[var(--green)] sm:flex-none"
           >
             {SORTS.map((s) => (
               <option key={s.id} value={s.id}>{s.label}</option>
@@ -104,8 +106,8 @@ export function ShopClient({ products = [] }: { products?: Product[] }) {
         </div>
       </div>
 
-      {/* category chips */}
-      <div className="mt-5 flex flex-wrap gap-2">
+      {/* category chips — one-line swiper on mobile, wraps on desktop */}
+      <div className="-mx-5 mt-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
         {CATS.map((c) => {
           const active = category === c.id && !sale;
           const href = c.id === "all" ? "/shop" : `/category/${c.id}`;
@@ -113,7 +115,7 @@ export function ShopClient({ products = [] }: { products?: Product[] }) {
             <Link
               key={c.id}
               href={href}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                 active
                   ? "border-[var(--ink)] bg-[var(--ink)] text-white"
                   : "border-black/15 bg-white text-[var(--ink-2)] hover:border-[var(--ink)]"
@@ -125,7 +127,7 @@ export function ShopClient({ products = [] }: { products?: Product[] }) {
         })}
         <Link
           href="/sale"
-          className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+          className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
             sale ? "border-[var(--coral)] bg-[var(--coral)] text-white" : "border-[var(--coral)] text-[var(--coral)] hover:bg-[var(--coral)] hover:text-white"
           }`}
         >

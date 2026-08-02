@@ -101,7 +101,7 @@ export function SiteHeader() {
                 </span>
               )}
             </Link>
-            <Link href="/account" aria-label="Account" className="relative hidden h-10 w-10 place-items-center rounded-full text-[var(--ink)] hover:bg-black/5 sm:grid">
+            <Link href="/account" aria-label="Account" className={`relative h-10 w-10 place-items-center rounded-full text-[var(--ink)] hover:bg-black/5 sm:grid ${user ? "grid" : "hidden"}`}>
               <Icon name="user" className="h-5 w-5" />
               {user && <span className="absolute right-2 top-2 h-2 w-2 rounded-full ring-2 ring-white" style={{ background: "var(--mint)" }} />}
             </Link>
