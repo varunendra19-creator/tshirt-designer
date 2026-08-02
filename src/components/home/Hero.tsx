@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { img, HERO_TRUST } from "@/lib/homeContent";
 import { Img, Icon } from "./primitives";
@@ -14,7 +13,6 @@ const CHIP_STYLES = [
 ];
 
 export function Hero() {
-  const [expanded, setExpanded] = useState(false);
   return (
     <section id="hero">
       <div
@@ -66,32 +64,25 @@ export function Hero() {
           </h1>
           <span className="mt-3 block h-1.5 w-36 rounded-full" style={{ background: "linear-gradient(90deg,var(--primary),var(--aqua))" }} />
 
-          <p className={`mt-5 max-w-md text-[17px] font-medium leading-relaxed text-[#39365a] ${expanded ? "" : "line-clamp-2"} lg:line-clamp-none`}>
+          <p className="mt-5 hidden max-w-md text-[17px] font-medium leading-relaxed text-[#39365a] lg:block">
             Shop <strong className="font-bold text-[var(--primary)]">oversized tees, hoodies &amp; custom-printed designs</strong> made
             for college life — bio-washed 100% cotton, student-friendly prices &amp; fast delivery across India.
           </p>
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="mt-0.5 text-sm font-bold text-[var(--primary)] lg:hidden"
-          >
-            {expanded ? "Show less" : "…more"}
-          </button>
 
-          <div className="mt-7 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex items-stretch gap-2.5 lg:mt-7 lg:gap-3">
             <Link
               href="/shop"
-              className="group inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[var(--primary)]/25 transition-transform hover:-translate-y-0.5"
+              className="group inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--primary)] px-3 py-3 text-[13px] font-semibold text-white shadow-lg shadow-[var(--primary)]/25 transition-transform hover:-translate-y-0.5 lg:flex-none lg:gap-2 lg:px-7 lg:py-3.5 lg:text-sm"
             >
               Shop Now
               <Icon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/customize"
-              className="group inline-flex items-center gap-2 rounded-full border-2 border-[var(--primary)]/25 bg-white px-7 py-3.5 text-sm font-semibold transition-colors hover:border-[var(--primary)]"
+              className="group inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-2 border-[var(--primary)]/25 bg-white px-3 py-3 text-[13px] font-semibold transition-colors hover:border-[var(--primary)] lg:flex-none lg:gap-2 lg:px-7 lg:py-3.5 lg:text-sm"
               style={{ color: NAVY }}
             >
-              <Icon name="sparkle" className="h-4 w-4 text-[var(--primary)]" />
+              <Icon name="sparkle" className="hidden h-4 w-4 text-[var(--primary)] lg:inline-block" />
               Customize Your Tee
             </Link>
           </div>
