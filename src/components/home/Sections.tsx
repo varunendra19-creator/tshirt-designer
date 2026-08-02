@@ -552,6 +552,30 @@ export function NewArrivals() {
 }
 
 /* ---- 10. Testimonials --------------------------------------------------- */
+function TestimonialCard({ t }: { t: (typeof TESTIMONIALS)[number] }) {
+  return (
+    <div className="group relative h-full overflow-hidden rounded-2xl border border-black/5 bg-white p-5 shadow-[0_14px_34px_-22px_rgba(31,41,55,0.5)] transition-transform hover:-translate-y-1">
+      <span className="pointer-events-none absolute -right-1 -top-3 font-display text-[70px] leading-none text-[var(--primary)]/10">&rdquo;</span>
+      <div className="relative flex items-center gap-3">
+        <div className="rounded-full p-[2px]" style={{ background: "var(--grad-hero)" }}>
+          <Img src={img(t.key)} alt={t.name} tone="linear-gradient(150deg,var(--primary),var(--aqua))" className="h-12 w-12 rounded-full ring-2 ring-white" />
+        </div>
+        <div>
+          <p className="flex items-center gap-1 text-sm font-bold text-[var(--ink)]">
+            {t.name}
+            <span className="grid h-3.5 w-3.5 place-items-center rounded-full bg-[var(--mint)] text-white">
+              <Icon name="check" className="h-2.5 w-2.5" />
+            </span>
+          </p>
+          <p className="text-xs text-[var(--ink-soft)]">{t.college}</p>
+        </div>
+      </div>
+      <div className="relative mt-3"><Stars rating={5} /></div>
+      <p className="relative mt-2 text-sm leading-relaxed text-[var(--ink-2)]">&ldquo;{t.quote}&rdquo;</p>
+    </div>
+  );
+}
+
 export function Testimonials() {
   const perPage = 3;
   const pages = Math.ceil(TESTIMONIALS.length / perPage);
@@ -560,11 +584,12 @@ export function Testimonials() {
   const shown = TESTIMONIALS.slice(page * perPage, page * perPage + perPage);
 
   return (
-    <section id="testimonials" className="mx-auto max-w-full px-5 py-10">
+    <section id="testimonials" className="w-full py-10 md:px-5">
       <Reveal>
-        <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="mb-6 flex items-center justify-between gap-4 px-5 md:px-0">
           <h2 className="font-display text-[clamp(1.4rem,3vw,2rem)] font-extrabold text-[var(--ink)]">Loved by Students ❤️</h2>
-          <div className="flex items-center gap-2">
+          {/* Arrows — desktop paginated view only */}
+          <div className="hidden items-center gap-2 md:flex">
             <button onClick={() => go(page - 1)} aria-label="Previous" className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-white text-[var(--ink)] shadow-sm transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]">
               <Icon name="chevron-left" className="h-4 w-4" />
             </button>
@@ -574,31 +599,24 @@ export function Testimonials() {
           </div>
         </div>
 
-        <div key={page} className="grid animate-[fadeSlideIn_0.35s_ease] gap-4 md:grid-cols-3">
-          {shown.map((t) => (
-            <div key={t.name} className="group relative overflow-hidden rounded-2xl border border-black/5 bg-white p-5 shadow-[0_14px_34px_-22px_rgba(31,41,55,0.5)] transition-transform hover:-translate-y-1">
-              <span className="pointer-events-none absolute -right-1 -top-3 font-display text-[70px] leading-none text-[var(--primary)]/10">&rdquo;</span>
-              <div className="relative flex items-center gap-3">
-                <div className="rounded-full p-[2px]" style={{ background: "var(--grad-hero)" }}>
-                  <Img src={img(t.key)} alt={t.name} tone="linear-gradient(150deg,var(--primary),var(--aqua))" className="h-12 w-12 rounded-full ring-2 ring-white" />
-                </div>
-                <div>
-                  <p className="flex items-center gap-1 text-sm font-bold text-[var(--ink)]">
-                    {t.name}
-                    <span className="grid h-3.5 w-3.5 place-items-center rounded-full bg-[var(--mint)] text-white">
-                      <Icon name="check" className="h-2.5 w-2.5" />
-                    </span>
-                  </p>
-                  <p className="text-xs text-[var(--ink-soft)]">{t.college}</p>
-                </div>
-              </div>
-              <div className="relative mt-3"><Stars rating={5} /></div>
-              <p className="relative mt-2 text-sm leading-relaxed text-[var(--ink-2)]">&ldquo;{t.quote}&rdquo;</p>
+        {/* Mobile: full-width one-line swiper through all testimonials */}
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
+          {TESTIMONIALS.map((t) => (
+            <div key={t.name} className="w-[82%] shrink-0 snap-start">
+              <TestimonialCard t={t} />
             </div>
           ))}
         </div>
 
-        <div className="mt-6 flex justify-center gap-1.5">
+        {/* Desktop: paginated 3-up grid */}
+        <div key={page} className="hidden animate-[fadeSlideIn_0.35s_ease] gap-4 md:grid md:grid-cols-3">
+          {shown.map((t) => (
+            <TestimonialCard key={t.name} t={t} />
+          ))}
+        </div>
+
+        {/* Dots — desktop paginated view only */}
+        <div className="mt-6 hidden justify-center gap-1.5 md:flex">
           {Array.from({ length: pages }).map((_, i) => (
             <button
               key={i}
