@@ -37,7 +37,7 @@ function Head({ title, emoji, action }: { title: string; emoji?: string; action?
 /* ---- 4. Category strip --------------------------------------------------- */
 export function CategoryStrip() {
   return (
-    <section className="mx-auto max-w-full px-5 pt-7 pb-2">
+    <section id="categories" className="mx-auto max-w-full px-5 pt-7 pb-2">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {CATEGORY_STRIP.map((c) => (
           <Link
@@ -97,7 +97,7 @@ export function FlashSale() {
     { v: t.s, label: "Secs" },
   ];
   return (
-    <section className="mx-auto max-w-full px-5 pt-2 pb-2">
+    <section id="flash-sale" className="mx-auto max-w-full px-5 pt-2 pb-2">
       <div
         className="relative flex flex-wrap items-center justify-between gap-x-8 gap-y-5 overflow-hidden rounded-2xl px-5 py-4 text-white shadow-lg md:px-8"
         style={{ background: "linear-gradient(95deg,#f2426f 0%,#f56b53 42%,#f79a3c 74%,#f9c23c 100%)" }}
@@ -163,7 +163,7 @@ const scrollRow = "flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-w
 
 export function ShowcaseRow() {
   return (
-    <section className="mx-auto max-w-full px-5 pt-2 pb-2">
+    <section id="showcase" className="mx-auto max-w-full px-5 pt-2 pb-2">
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr_1.15fr]">
         {/* Best Sellers */}
         <Reveal className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
@@ -293,7 +293,7 @@ export function CustomBuilder() {
   const price = BUILDER.basePrice + BUILDER.styles[style].add + BUILDER.fabrics[fabric].add;
 
   return (
-    <section className="mx-auto max-w-full px-5 pt-2 pb-12">
+    <section id="custom-builder" className="mx-auto max-w-full px-5 pt-2 pb-12">
       <Reveal>
         <div className="relative overflow-hidden rounded-[2rem] border border-black/5 bg-gradient-to-br from-[#efe9fb] via-white to-[#eef7f6] p-5 shadow-[var(--shadow)] md:p-8">
           {/* background texture + glow blobs */}
@@ -453,7 +453,7 @@ export function CustomBuilder() {
 /* ---- 6. Trust icons ----------------------------------------------------- */
 export function TrustIcons() {
   return (
-    <section className="mx-auto max-w-full px-5 pt-1 pb-4">
+    <section id="trust" className="mx-auto max-w-full px-5 pt-1 pb-4">
       <div className="grid grid-cols-2 items-center gap-x-4 gap-y-6 rounded-2xl bg-[#f1ecfb] px-6 py-6 sm:grid-cols-3 lg:grid-cols-5">
         {TRUST_ICONS.map((t) => (
           <div key={t.title} className="flex items-center justify-center gap-3">
@@ -501,7 +501,7 @@ export function Trending() {
 /* ---- 8. Outfit inspiration --------------------------------------------- */
 export function CampusLooks() {
   return (
-    <section className="mx-auto max-w-full px-5 pt-2 pb-8">
+    <section id="campus-looks" className="mx-auto max-w-full px-5 pt-2 pb-8">
       <Reveal>
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
@@ -557,7 +557,7 @@ export function Testimonials() {
   const shown = TESTIMONIALS.slice(page * perPage, page * perPage + perPage);
 
   return (
-    <section className="mx-auto max-w-full px-5 py-10">
+    <section id="testimonials" className="mx-auto max-w-full px-5 py-10">
       <Reveal>
         <div className="mb-6 flex items-center justify-between gap-4">
           <h2 className="font-display text-[clamp(1.4rem,3vw,2rem)] font-extrabold text-[var(--ink)]">Loved by Students ❤️</h2>
@@ -613,7 +613,7 @@ export function Testimonials() {
 /* ---- 11. Trusted colleges ---------------------------------------------- */
 export function Colleges() {
   return (
-    <section className="mx-auto max-w-full px-5 pt-2 pb-6">
+    <section id="colleges" className="mx-auto max-w-full px-5 pt-2 pb-6">
       <div
         className="relative overflow-hidden rounded-[1.6rem] px-5 py-8 text-white shadow-[0_18px_40px_-18px_rgba(124,58,237,0.55)]"
         style={{ background: "linear-gradient(120deg,var(--primary-2) 0%,var(--primary) 55%,var(--primary) 100%)" }}
@@ -644,7 +644,7 @@ export function Colleges() {
 /* ---- 12. Newsletter ----------------------------------------------------- */
 export function Newsletter() {
   return (
-    <section className="mx-auto max-w-full px-5 py-10">
+    <section id="newsletter" className="mx-auto max-w-full px-5 py-10">
       <Reveal>
         <div className="relative flex min-h-[150px] items-center overflow-hidden rounded-[1.5rem] text-white shadow-[0_18px_44px_-20px_rgba(124,58,237,0.5)]" style={{ background: "var(--grad-band)" }}>
           {/* decorative sparkles */}

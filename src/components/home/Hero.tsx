@@ -14,7 +14,7 @@ const CHIP_STYLES = [
 
 export function Hero() {
   return (
-    <section>
+    <section id="hero">
       <div
         className="relative overflow-hidden min-h-[420px] md:min-h-[500px]"
         style={{ background: "linear-gradient(160deg,#e9dff7 0%,#f2ecfb 48%,#f9f6fe 78%,#ffffff 100%)" }}
