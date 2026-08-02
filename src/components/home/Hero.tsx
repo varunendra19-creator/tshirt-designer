@@ -4,10 +4,10 @@ import Link from "next/link";
 import { img, HERO_TRUST } from "@/lib/homeContent";
 import { Img, Icon } from "./primitives";
 
-const NAVY = "#1e1b4b";
+const NAVY = "var(--ink)";
 
 const CHIP_STYLES = [
-  { bg: "rgba(124,58,237,0.12)", fg: "#6d28d9" }, // violet
+  { bg: "rgba(124,58,237,0.12)", fg: "var(--primary-2)" }, // violet
   { bg: "rgba(6,182,212,0.14)", fg: "#0891b2" }, // cyan
   { bg: "rgba(16,185,129,0.14)", fg: "#059669" }, // mint
 ];
@@ -27,7 +27,7 @@ export function Hero() {
           <Img
             src={img("hero-students")}
             alt="Happy college students wearing Campus Mode"
-            tone="linear-gradient(150deg,#7c3aed,#6d28d9 55%,#22d3ee)"
+            tone="linear-gradient(150deg,var(--primary),var(--primary-2) 55%,var(--aqua))"
             className="h-full w-full"
             imgClassName="object-[center_20%]"
             priority
@@ -38,7 +38,7 @@ export function Hero() {
         <div className="relative z-10 max-w-xl px-6 py-10 md:px-12 md:py-14">
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-md shadow-[var(--primary)]/25"
-            style={{ background: "linear-gradient(90deg,#7c3aed,#22d3ee)" }}
+            style={{ background: "linear-gradient(90deg,var(--primary),var(--aqua))" }}
           >
             <Icon name="sparkle" className="h-3.5 w-3.5" />
             New Semester Drop
@@ -50,7 +50,7 @@ export function Hero() {
             <br />
             Campus Style
           </h1>
-          <span className="mt-3 block h-1.5 w-36 rounded-full" style={{ background: "linear-gradient(90deg,#7c3aed,#22d3ee)" }} />
+          <span className="mt-3 block h-1.5 w-36 rounded-full" style={{ background: "linear-gradient(90deg,var(--primary),var(--aqua))" }} />
 
           <p className="mt-5 max-w-md text-[17px] font-medium leading-relaxed text-[#39365a]">
             Shop <strong className="font-bold text-[var(--primary)]">oversized tees, hoodies &amp; custom-printed designs</strong> made
@@ -95,7 +95,7 @@ export function Hero() {
             <Img
               src={img("hero-students")}
               alt="Happy college students wearing Campus Mode"
-              tone="linear-gradient(150deg,#7c3aed,#22d3ee)"
+              tone="linear-gradient(150deg,var(--primary),var(--aqua))"
               className="aspect-[16/10] w-full rounded-2xl border border-white"
               priority
             />

@@ -50,7 +50,7 @@ export function CategoryStrip() {
               <Img
                 src={img(c.key)}
                 alt={c.label}
-                tone="linear-gradient(150deg,#7c3aed,#22d3ee)"
+                tone="linear-gradient(150deg,var(--primary),var(--aqua))"
                 className="h-full w-full"
                 imgClassName="transition-transform duration-500 group-hover:scale-110"
               />
@@ -167,7 +167,7 @@ export function ShowcaseRow() {
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr_1.15fr]">
         {/* Best Sellers */}
         <Reveal className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
-          <ColHead title="Best Sellers" href="/shop" accent="linear-gradient(90deg,#7c3aed,#a855f7)" />
+          <ColHead title="Best Sellers" href="/shop" accent="linear-gradient(90deg,var(--primary),#a855f7)" />
           <div className={scrollRow}>
             {TRENDING.map((p) => (
               <div key={p.id} className="w-[150px] shrink-0">
@@ -179,11 +179,11 @@ export function ShowcaseRow() {
 
         {/* Outfit Inspiration */}
         <Reveal delay={80} className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
-          <ColHead title="Outfit Inspiration" href="/shop" accent="linear-gradient(90deg,#22d3ee,#0891b2)" />
+          <ColHead title="Outfit Inspiration" href="/shop" accent="linear-gradient(90deg,var(--aqua),#0891b2)" />
           <div className="grid grid-cols-3 gap-2">
             {OUTFITS.map((o) => (
               <Link key={o.label} href="/shop" className="group relative block aspect-[3/4] overflow-hidden rounded-xl">
-                <Img src={img(o.key)} alt={o.label} tone="linear-gradient(150deg,#7c3aed,#22d3ee)" className="absolute inset-0 h-full w-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
+                <Img src={img(o.key)} alt={o.label} tone="linear-gradient(150deg,var(--primary),var(--aqua))" className="absolute inset-0 h-full w-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
                 <span className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/85 text-[var(--ink)]">
                   <Icon name="heart" className="h-3 w-3" />
@@ -196,7 +196,7 @@ export function ShowcaseRow() {
 
         {/* New Arrivals */}
         <Reveal delay={160} className="min-w-0 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
-          <ColHead title="New Arrivals" href="/shop" accent="linear-gradient(90deg,#34d399,#10b981)" />
+          <ColHead title="New Arrivals" href="/shop" accent="linear-gradient(90deg,var(--mint),#10b981)" />
           <div className={scrollRow}>
             {NEW_ARRIVALS.map((p) => (
               <div key={p.id} className="w-[150px] shrink-0">
@@ -253,10 +253,10 @@ function TeePreview({ color, variant, text, setText }: { color: string; variant:
       {!pocket && (
         <div className="absolute left-1/2 top-[49%] w-[52%] -translate-x-1/2 -translate-y-1/2">
           <div className="relative">
-            <div className="absolute -inset-x-4 -inset-y-4 -rotate-3 bg-[#c9b1f4]" style={{ borderRadius: "58% 42% 62% 38% / 56% 46% 54% 44%" }} />
-            <div className="absolute -right-5 -top-3 h-2 w-2 rounded-full bg-[#c9b1f4]" />
-            <div className="absolute -left-6 top-3 h-1.5 w-1.5 rounded-full bg-[#c9b1f4]" />
-            <div className="absolute -bottom-4 left-2 h-1.5 w-1.5 rounded-full bg-[#c9b1f4]" />
+            <div className="absolute -inset-x-4 -inset-y-4 -rotate-3 bg-[var(--primary-soft)]" style={{ borderRadius: "58% 42% 62% 38% / 56% 46% 54% 44%" }} />
+            <div className="absolute -right-5 -top-3 h-2 w-2 rounded-full bg-[var(--primary-soft)]" />
+            <div className="absolute -left-6 top-3 h-1.5 w-1.5 rounded-full bg-[var(--primary-soft)]" />
+            <div className="absolute -bottom-4 left-2 h-1.5 w-1.5 rounded-full bg-[var(--primary-soft)]" />
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -276,11 +276,11 @@ function TeePreview({ color, variant, text, setText }: { color: string; variant:
 
 const FEATURE_ICONS = ["text", "upload", "palette", "sparkle", "heart", "bolt"];
 const FEATURE_COLORS = [
-  "linear-gradient(135deg,#7c3aed,#a855f7)",
+  "linear-gradient(135deg,var(--primary),#a855f7)",
   "linear-gradient(135deg,#14b8a6,#0d9488)",
-  "linear-gradient(135deg,#fb923c,#f97316)",
+  "linear-gradient(135deg,var(--accent),#f97316)",
   "linear-gradient(135deg,#ec4899,#db2777)",
-  "linear-gradient(135deg,#3b82f6,#2563eb)",
+  "linear-gradient(135deg,var(--info),#2563eb)",
   "linear-gradient(135deg,#22c55e,#16a34a)",
 ];
 
@@ -515,7 +515,7 @@ export function CampusLooks() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {CAMPUS_LOOKS.map((o) => (
             <Link key={o.label} href="/shop" className="group relative block aspect-[3/4] overflow-hidden rounded-2xl border border-black/5">
-              <Img src={img(o.key)} alt={o.label} tone="linear-gradient(150deg,#7c3aed,#22d3ee)" label={o.label} className="absolute inset-0 h-full w-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
+              <Img src={img(o.key)} alt={o.label} tone="linear-gradient(150deg,var(--primary),var(--aqua))" label={o.label} className="absolute inset-0 h-full w-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
               <span className="absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full bg-white/85 text-[var(--ink)] backdrop-blur transition-colors group-hover:text-[var(--coral)]">
                 <Icon name="heart" className="h-3.5 w-3.5" />
@@ -577,7 +577,7 @@ export function Testimonials() {
               <span className="pointer-events-none absolute -right-1 -top-3 font-display text-[70px] leading-none text-[var(--primary)]/10">&rdquo;</span>
               <div className="relative flex items-center gap-3">
                 <div className="rounded-full p-[2px]" style={{ background: "var(--grad-hero)" }}>
-                  <Img src={img(t.key)} alt={t.name} tone="linear-gradient(150deg,#7c3aed,#22d3ee)" className="h-12 w-12 rounded-full ring-2 ring-white" />
+                  <Img src={img(t.key)} alt={t.name} tone="linear-gradient(150deg,var(--primary),var(--aqua))" className="h-12 w-12 rounded-full ring-2 ring-white" />
                 </div>
                 <div>
                   <p className="flex items-center gap-1 text-sm font-bold text-[var(--ink)]">
@@ -616,7 +616,7 @@ export function Colleges() {
     <section className="mx-auto max-w-full px-5 pt-2 pb-6">
       <div
         className="relative overflow-hidden rounded-[1.6rem] px-5 py-8 text-white shadow-[0_18px_40px_-18px_rgba(124,58,237,0.55)]"
-        style={{ background: "linear-gradient(120deg,#6d28d9 0%,#7c3aed 55%,#8b5cf6 100%)" }}
+        style={{ background: "linear-gradient(120deg,var(--primary-2) 0%,var(--primary) 55%,var(--primary) 100%)" }}
       >
         <div
           className="pointer-events-none absolute inset-0 opacity-60"

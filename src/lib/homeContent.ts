@@ -72,7 +72,7 @@ export const BUILDER = {
     { gsm: "240 GSM", note: "Premium Cotton", add: 150 },
     { gsm: "260 GSM", note: "Heavy Weight", add: 250 },
   ],
-  colors: ["#1f2937", "#f4f0e6", "#ef4444", "#f59e0b", "#10b981", "#22d3ee", "#3b82f6", "#7c3aed"],
+  colors: ["#1f2937", "#f4f0e6", "var(--danger)", "#f59e0b", "#10b981", "var(--aqua)", "var(--info)", "var(--primary)"],
 };
 
 export const TRUST_ICONS = [

@@ -38,7 +38,7 @@ export function ProductCard({ p }: { p: Product }) {
           imgClassName="transition-transform duration-500 group-hover:scale-105"
         />
         {off > 0 && (
-          <span className="absolute left-2.5 top-2.5 rounded-lg bg-[#ef4444] px-2 py-0.5 text-[11px] font-bold text-white shadow">
+          <span className="absolute left-2.5 top-2.5 rounded-lg bg-[var(--danger)] px-2 py-0.5 text-[11px] font-bold text-white shadow">
             -{off}%
           </span>
         )}

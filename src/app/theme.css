@@ -37,6 +37,16 @@
   --lime: var(--aqua);
   --lime-2: #06b6d4;
 
+  /* ---- Status / semantic (kept stable across themes) ---- */
+  --info: #3b82f6;        /* blue  — "shipped" / informational */
+  --danger: #ef4444;      /* red   — discount %, errors, out-of-stock */
+  --success: var(--mint); /* green — paid / in-stock */
+  --warning: var(--accent);
+
+  /* ---- Derived tints — auto-follow --primary (no need to edit) ---- */
+  --primary-soft: color-mix(in srgb, var(--primary) 42%, #ffffff); /* light tint */
+  --primary-tint: color-mix(in srgb, var(--primary) 12%, #ffffff); /* very light bg */
+
   /* ---- 4. Gradients & shadow ------------------------------------------ */
   --grad-hero: linear-gradient(120deg, var(--primary) 0%, var(--primary-2) 45%, var(--aqua) 100%);
   --grad-aqua: linear-gradient(120deg, var(--aqua), var(--mint));

@@ -24,7 +24,7 @@ type Order = {
 };
 type Review = { id: string; product_id: string; rating: number; title: string | null; body: string | null; created_at: string };
 
-const STATUS_COLOR: Record<string, string> = { pending: "var(--accent)", processing: "var(--aqua)", shipped: "#3b82f6", delivered: "var(--mint)", cancelled: "var(--coral)" };
+const STATUS_COLOR: Record<string, string> = { pending: "var(--accent)", processing: "var(--aqua)", shipped: "var(--info)", delivered: "var(--mint)", cancelled: "var(--coral)" };
 const STATUS_STEPS = ["pending", "processing", "shipped", "delivered"];
 const STEP_LABEL: Record<string, string> = { pending: "Placed", processing: "Packing", shipped: "Shipped", delivered: "Delivered" };
 const PAY_COLOR: Record<string, string> = { unpaid: "var(--ink-soft)", paid: "var(--mint)", partially_refunded: "var(--accent)", refunded: "var(--coral)", failed: "var(--coral)" };
