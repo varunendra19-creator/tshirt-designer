@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { img, HERO_TRUST } from "@/lib/homeContent";
 import { Img, Icon } from "./primitives";
@@ -13,10 +14,11 @@ const CHIP_STYLES = [
 ];
 
 export function Hero() {
+  const [expanded, setExpanded] = useState(false);
   return (
     <section id="hero">
       <div
-        className="relative overflow-hidden min-h-[420px] md:min-h-[500px]"
+        className="relative overflow-hidden lg:min-h-[500px]"
         style={{ background: "linear-gradient(160deg,#e9dff7 0%,#f2ecfb 48%,#f9f6fe 78%,#ffffff 100%)" }}
       >
         {/* Desktop image — layered above the gradient with a straight diagonal (slanted) edge */}
@@ -34,10 +36,22 @@ export function Hero() {
           />
         </div>
 
+        {/* Mobile / tablet image — full-width on top */}
+        <div className="lg:hidden">
+          <Img
+            src={img("hero-students")}
+            alt="Happy college students wearing Campus Mode"
+            tone="linear-gradient(150deg,var(--primary),var(--primary-2) 55%,var(--aqua))"
+            className="aspect-[16/11] w-full"
+            imgClassName="object-[center_25%]"
+            priority
+          />
+        </div>
+
         {/* Content */}
-        <div className="relative z-10 max-w-xl px-6 py-10 md:px-12 md:py-14">
+        <div className="relative z-10 max-w-xl px-6 pt-6 pb-9 lg:px-12 lg:py-14">
           <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white shadow-md shadow-[var(--primary)]/25"
+            className="inline-flex w-max max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-md shadow-[var(--primary)]/25 sm:text-[11px] sm:tracking-[0.14em]"
             style={{ background: "linear-gradient(90deg,var(--primary),var(--aqua))" }}
           >
             <Icon name="sparkle" className="h-3.5 w-3.5" />
@@ -52,10 +66,17 @@ export function Hero() {
           </h1>
           <span className="mt-3 block h-1.5 w-36 rounded-full" style={{ background: "linear-gradient(90deg,var(--primary),var(--aqua))" }} />
 
-          <p className="mt-5 max-w-md text-[17px] font-medium leading-relaxed text-[#39365a]">
+          <p className={`mt-5 max-w-md text-[17px] font-medium leading-relaxed text-[#39365a] ${expanded ? "" : "line-clamp-2"} lg:line-clamp-none`}>
             Shop <strong className="font-bold text-[var(--primary)]">oversized tees, hoodies &amp; custom-printed designs</strong> made
             for college life — bio-washed 100% cotton, student-friendly prices &amp; fast delivery across India.
           </p>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-0.5 text-sm font-bold text-[var(--primary)] lg:hidden"
+          >
+            {expanded ? "Show less" : "…more"}
+          </button>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link
@@ -66,11 +87,12 @@ export function Hero() {
               <Icon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--primary)]/25 bg-white px-7 py-3.5 text-sm font-semibold transition-colors hover:border-[var(--primary)]"
+              href="/customize"
+              className="group inline-flex items-center gap-2 rounded-full border-2 border-[var(--primary)]/25 bg-white px-7 py-3.5 text-sm font-semibold transition-colors hover:border-[var(--primary)]"
               style={{ color: NAVY }}
             >
-              Explore Collection
+              <Icon name="sparkle" className="h-4 w-4 text-[var(--primary)]" />
+              Customize Your Tee
             </Link>
           </div>
 
@@ -90,16 +112,6 @@ export function Hero() {
             })}
           </div>
 
-          {/* Mobile image */}
-          <div className="mt-8 lg:hidden">
-            <Img
-              src={img("hero-students")}
-              alt="Happy college students wearing Campus Mode"
-              tone="linear-gradient(150deg,var(--primary),var(--aqua))"
-              className="aspect-[16/10] w-full rounded-2xl border border-white"
-              priority
-            />
-          </div>
         </div>
 
         {/* Floating student offer card */}
