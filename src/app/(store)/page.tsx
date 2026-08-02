@@ -14,18 +14,21 @@ import {
 
 export default function Home() {
   return (
-    <>
-      <Hero />
-      <CategoryStrip />
-      <FlashSale />
-      <ShowcaseRow />
-      <TrustIcons />
-      <CustomBuilder />
-      <Colleges />
-      <Trending />
-      <CampusLooks />
-      <Testimonials />
-      <Newsletter />
-    </>
+    <div className="flex flex-col">
+      {/* On mobile, show the categories slider first; on desktop keep the hero first. */}
+      <div className="order-2 md:order-1"><Hero /></div>
+      <div className="order-1 md:order-2"><CategoryStrip /></div>
+      <div className="order-3 flex flex-col">
+        <FlashSale />
+        <ShowcaseRow />
+        <TrustIcons />
+        <CustomBuilder />
+        <Colleges />
+        <Trending />
+        <CampusLooks />
+        <Testimonials />
+        <Newsletter />
+      </div>
+    </div>
   );
 }

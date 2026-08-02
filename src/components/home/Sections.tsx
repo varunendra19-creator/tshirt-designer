@@ -38,12 +38,13 @@ function Head({ title, emoji, action }: { title: string; emoji?: string; action?
 export function CategoryStrip() {
   return (
     <section id="categories" className="mx-auto max-w-full px-5 pt-7 pb-2">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {/* Mobile: swipeable slider. Desktop: 6-up grid. */}
+      <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-6 md:snap-none md:overflow-visible md:px-0">
         {CATEGORY_STRIP.map((c) => (
           <Link
             key={c.label}
             href={c.href}
-            className="group flex items-center gap-3 rounded-2xl p-2.5 pr-3 transition-transform duration-200 hover:-translate-y-0.5"
+            className="group flex shrink-0 basis-[46%] snap-start items-center gap-3 rounded-2xl p-2.5 pr-3 transition-transform duration-200 hover:-translate-y-0.5 sm:basis-[31%] md:basis-auto md:shrink"
             style={{ background: c.bg }}
           >
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/40">
