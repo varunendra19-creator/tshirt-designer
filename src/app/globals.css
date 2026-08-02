@@ -6,8 +6,35 @@
   box-sizing: border-box;
 }
 
+/* The store is a light-themed UI. Pin the color-scheme to light so the browser
+   renders native form controls (inputs, selects, textareas, checkboxes) with a
+   light background + dark text even when the user's OS is in dark mode —
+   otherwise fields render dark-on-dark and become unreadable. */
+html {
+  color-scheme: light;
+}
+
+/* Belt-and-suspenders: force every TEXT form control to a readable light
+   appearance app-wide (checkboxes/radios/colour/range/file/buttons excluded so
+   their native/accent styling is preserved). Wrapped in :where() so the rule has
+   ZERO specificity — any component-level `bg-*` / `text-*` utility still wins,
+   but bare inputs (which OS dark mode was rendering dark-on-dark) get fixed. */
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="image"])),
+:where(textarea),
+:where(select) {
+  background-color: #ffffff;
+  color: #1a1524;
+}
+:where(input, textarea)::placeholder {
+  color: #8b8794;
+  opacity: 1;
+}
+
+/* The 3D designer clamps itself to h-screen; the storefront needs to scroll,
+   so the body is no longer overflow:hidden — only horizontal is clipped to
+   keep the kinetic marquees from creating a scrollbar. */
 body {
-  overflow: hidden;
+  overflow-x: hidden;
   background: #0f0f0f;
 }
 
@@ -15,19 +42,28 @@ body {
   position: relative !important;
 }
 
-/* Custom scrollbar */
+/* contentEditable placeholder for the admin rich-text editor */
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+/* Custom scrollbar — neutral so it reads well on both the dark designer and the
+   light storefront/admin surfaces (a semi-transparent thumb on a clear track). */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
+  background: rgba(120, 120, 130, 0.45);
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: rgba(120, 120, 130, 0.7);
 }
 
 /* Fabric.js canvas controls */
@@ -59,4 +95,142 @@ body {
 
 .drop-active {
   animation: dropPulse 1s ease infinite;
+}
+
+/* ==========================================================================
+   TEEVO storefront — design system
+   ========================================================================== */
+
+.teevo {
+  /* Bright, youthful India-market palette. Var names are kept for
+     compatibility; values are the new bright system:
+       --lime  = marigold yellow (primary pop / highlights / bright bands)
+       --green = electric violet (brand accent / logo / CTAs / icons)
+       --coral = hot pink (sale / heat / wishlist) */
+  /* Campus Mode palette — bright, youthful, premium.
+     Semantic tokens below; --green/--lime/--coral kept as aliases so inner
+     pages (shop/product/cart/checkout) rebrand automatically. */
+  --primary: #7c3aed;   /* violet  */
+  --primary-2: #6d28d9;
+  --aqua: #22d3ee;      /* cyan    */
+  --accent: #fb923c;    /* orange  */
+  --mint: #34d399;      /* success */
+  --paper: #fcfcff;
+  --paper-2: #f4f0ff;
+  --panel: #ffffff;
+  --ink: #1f2937;
+  --ink-2: #4b5563;
+  --ink-soft: #98a1b0;
+  --lime: #22d3ee;         /* alias → aqua pop  */
+  --lime-2: #06b6d4;
+  --green: #7c3aed;        /* alias → primary   */
+  --green-deep: #6d28d9;
+  --coral: #fb923c;        /* alias → accent    */
+  --line: rgba(31, 41, 55, 0.09);
+  --shadow: 0 20px 48px -26px rgba(124, 58, 237, 0.3);
+  --grad-hero: linear-gradient(120deg, #7c3aed 0%, #6d28d9 45%, #22d3ee 100%);
+  --grad-aqua: linear-gradient(120deg, #22d3ee, #34d399);
+  --grad-band: linear-gradient(110deg, #22d3ee 0%, #7c3aed 60%, #8b5cf6 100%);
+
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.font-body {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Paper grain for depth without an image asset */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(rgba(20, 20, 15, 0.05) 1px, transparent 1px);
+  background-size: 4px 4px;
+  z-index: 0;
+}
+
+/* Marquee ticker */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+}
+.marquee.reverse { animation-direction: reverse; }
+.marquee:hover { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Organic blob that breathes behind the hero subject */
+@keyframes blob {
+  0%, 100% { border-radius: 62% 38% 42% 58% / 56% 44% 56% 44%; }
+  33% { border-radius: 42% 58% 63% 37% / 43% 62% 38% 57%; }
+  66% { border-radius: 55% 45% 38% 62% / 60% 40% 55% 45%; }
+}
+.blob { animation: blob 14s ease-in-out infinite; }
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(var(--tw-rotate, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--tw-rotate, 0deg)); }
+}
+.floaty { animation: floaty 5s ease-in-out infinite; }
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.spin-slow { animation: spin-slow 18s linear infinite; }
+
+/* Scroll-reveal — toggled by an IntersectionObserver */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .marquee, .blob, .floaty, .spin-slow { animation: none; }
+}
+
+/* Sheen sweep on hover for cards / buttons */
+.sheen { position: relative; overflow: hidden; }
+.sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transition: left 0.6s ease;
+}
+.sheen:hover::after { left: 130%; }
+
+/* --- Print isolation: show only the invoice when printing --- */
+@media print {
+  body { background: #fff !important; }
+  body * { visibility: hidden !important; }
+  #invoice-print, #invoice-print * { visibility: visible !important; }
+  #invoice-print { position: absolute !important; left: 0; top: 0; width: 100%; padding: 0 !important; }
+  .no-print { display: none !important; }
+  @page { margin: 14mm; }
 }

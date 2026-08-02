@@ -1,0 +1,112 @@
+{
+  "note": "Each entry maps a /generated/<file> referenced in src/lib/homeContent.ts to a Pixazo prompt. Audience: Indian market, adults 20-30 (men & women). Run: PIXAZO_API_KEY=xxx npm run gen:images",
+  "resolution": "1K",
+  "output_format": "jpeg",
+  "images": [
+    {
+      "file": "hero.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Editorial streetwear fashion photograph of two attractive young Indian adults, a man and a woman in their mid-twenties, standing together and laughing, both wearing premium graphic cotton t-shirts, trendy sunglasses, warm cream studio background, soft directional daylight, high-end ecommerce catalog look, sharp focus, natural Indian skin tones, vibrant but tasteful color, magazine quality"
+    },
+    {
+      "file": "cat-men.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Confident young Indian man in his twenties wearing a plain premium forest-green oversized cotton t-shirt, three-quarter view, clean minimal studio background, soft light, ecommerce category banner, catalog photography, crisp detail"
+    },
+    {
+      "file": "cat-women.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Stylish young Indian woman in her twenties wearing a soft lilac fitted cotton t-shirt, relaxed confident pose, clean neutral studio background, soft flattering light, ecommerce category banner, fashion catalog photography"
+    },
+    {
+      "file": "cat-oversized.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Trendy young Indian person wearing a baggy oversized streetwear t-shirt, relaxed street style pose, urban muted background, natural daylight, fashion category banner, catalog photography"
+    },
+    {
+      "file": "cat-graphic.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Young Indian adult wearing a bold colorful graphic-print t-shirt with pop-culture artwork, energetic pose, clean studio background, soft light, fashion category banner, catalog photography"
+    },
+    {
+      "file": "product-desi-swag.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a black oversized t-shirt with a bold desi streetwear graphic print in Hindi-inspired typography on the chest, worn by a young Indian male model, front view, clean light-grey studio background, even soft lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-chai-lover.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a warm brown t-shirt with a playful 'Chai Over Everything' typographic print and a small chai cup graphic, worn by a young Indian model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-minimal-mood.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a cream t-shirt with a small minimal line-art print on the chest, worn by a young Indian female model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-scene-on-hai.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a black t-shirt with a bold neon-green 'Scene On Hai' slang typographic print, worn by a young Indian male model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-retro-bolly.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a mustard-yellow t-shirt with a retro 80s Bollywood poster style graphic print, worn by a young Indian model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-good-vibes.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a cream t-shirt with a bold 'GOOD VIBES ONLY' typographic print and a small smiley, worn by a young Indian model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-anime-nights.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a navy t-shirt with a vibrant Japanese anime character graphic print, worn by a young Indian male model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-cosmic-trip.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a black t-shirt with a cosmic galaxy and astronaut graphic print in purple and blue, worn by a young Indian model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-cricket-fever.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a blue t-shirt with a bold cricket-inspired graphic print, worn by a young Indian male model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-yaari-oversized.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a maroon oversized t-shirt with a bold friendship-themed desi graphic print, worn by a young Indian male model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-floral-bloom.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a pink t-shirt with a delicate floral print, worn by a young Indian female model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "product-monsoon-blues.jpg",
+      "aspect_ratio": "4:5",
+      "prompt": "Product photo of a navy-blue t-shirt with a subtle rain-themed graphic print, worn by a young Indian female model, front view, clean light background, soft studio lighting, ecommerce catalog"
+    },
+    {
+      "file": "collection-anime.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Dynamic editorial of a young Indian person wearing an anime graphic-print t-shirt, energetic pose, moody colorful lighting, fashion collection banner, catalog photography"
+    },
+    {
+      "file": "collection-desi.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Street-style editorial of a young Indian person wearing a desi streetwear t-shirt against an urban Indian city backdrop, confident pose, warm daylight, fashion collection banner, catalog photography"
+    },
+    {
+      "file": "collection-minimal.jpg",
+      "aspect_ratio": "3:4",
+      "prompt": "Minimalist fashion editorial of a young Indian model wearing a plain beige premium t-shirt, calm elegant pose, soft neutral tones, muted background, refined collection banner, catalog photography"
+    },
+    {
+      "file": "customize-preview.jpg",
+      "aspect_ratio": "4:3",
+      "prompt": "Clean 3D render of a white t-shirt floating on a dark studio background with a colorful custom graphic design on the chest, soft studio lighting, product design software preview, high detail"
+    }
+  ]
+}
