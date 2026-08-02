@@ -112,38 +112,10 @@ body {
    TEEVO storefront — design system
    ========================================================================== */
 
+/* All design tokens (colours, fonts, sizes, radii) live in the theme config:
+   src/app/theme.css — the single source of truth. Edit that file to re-theme. */
 .teevo {
-  /* Bright, youthful India-market palette. Var names are kept for
-     compatibility; values are the new bright system:
-       --lime  = marigold yellow (primary pop / highlights / bright bands)
-       --green = electric violet (brand accent / logo / CTAs / icons)
-       --coral = hot pink (sale / heat / wishlist) */
-  /* Campus Mode palette — bright, youthful, premium.
-     Semantic tokens below; --green/--lime/--coral kept as aliases so inner
-     pages (shop/product/cart/checkout) rebrand automatically. */
-  --primary: #7c3aed;   /* violet  */
-  --primary-2: #6d28d9;
-  --aqua: #22d3ee;      /* cyan    */
-  --accent: #fb923c;    /* orange  */
-  --mint: #34d399;      /* success */
-  --paper: #fcfcff;
-  --paper-2: #f4f0ff;
-  --panel: #ffffff;
-  --ink: #1f2937;
-  --ink-2: #4b5563;
-  --ink-soft: #98a1b0;
-  --lime: #22d3ee;         /* alias → aqua pop  */
-  --lime-2: #06b6d4;
-  --green: #7c3aed;        /* alias → primary   */
-  --green-deep: #6d28d9;
-  --coral: #fb923c;        /* alias → accent    */
-  --line: rgba(31, 41, 55, 0.09);
-  --shadow: 0 20px 48px -26px rgba(124, 58, 237, 0.3);
-  --grad-hero: linear-gradient(120deg, #7c3aed 0%, #6d28d9 45%, #22d3ee 100%);
-  --grad-aqua: linear-gradient(120deg, #22d3ee, #34d399);
-  --grad-band: linear-gradient(110deg, #22d3ee 0%, #7c3aed 60%, #8b5cf6 100%);
-
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
@@ -151,13 +123,13 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-heading);
   letter-spacing: -0.01em;
   font-weight: 700;
 }
 
 .font-body {
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Paper grain for depth without an image asset */

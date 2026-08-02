@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Bricolage_Grotesque, Anton } from "next/font/google";
+import "./theme.css"; // <-- theme config (colours, fonts, sizes): edit this to re-theme
 import "./globals.css";
 import { Providers } from "./providers";
 import { safeJsonLd } from "@/lib/jsonld";

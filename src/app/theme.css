@@ -1,0 +1,85 @@
+/* =============================================================================
+   THEME CONFIG — single source of truth for the whole site's look.
+   Change a value here and it updates everywhere (all components read these vars).
+
+   Sections:
+     1. Brand colours          4. Gradients & shadow
+     2. Text / surfaces         5. Typography (font family + sizes)
+     3. Legacy aliases          6. Radii
+
+   NOTE ON FONTS: the actual typefaces are loaded (optimised) via next/font in
+   `src/app/layout.tsx`. This file controls the *role → family* mapping and all
+   sizes. To swap a typeface with optimisation, edit layout.tsx; for a quick swap
+   to a system/web font, just override --font-sans / --font-heading below.
+   ========================================================================== */
+
+:root {
+  /* ---- 1. Brand colours ------------------------------------------------ */
+  --primary: #7c3aed;     /* violet — CTAs, links, logo, active states */
+  --primary-2: #6d28d9;   /* deeper violet — gradients / hovers */
+  --accent: #fb923c;      /* orange — badges, sale, highlights */
+  --mint: #34d399;        /* green — success / in-stock */
+  --aqua: #22d3ee;        /* cyan — secondary pop */
+
+  /* ---- 2. Text & surfaces --------------------------------------------- */
+  --ink: #1f2937;         /* primary text */
+  --ink-2: #4b5563;       /* secondary text */
+  --ink-soft: #98a1b0;    /* muted text / placeholders */
+  --paper: #fcfcff;       /* page background */
+  --paper-2: #f4f0ff;     /* subtle surface / cards */
+  --panel: #ffffff;       /* solid panels / inputs */
+  --line: rgba(31, 41, 55, 0.09); /* hairline borders */
+
+  /* ---- 3. Legacy aliases (kept so inner pages rebrand automatically) --- */
+  --green: var(--primary);
+  --green-deep: var(--primary-2);
+  --coral: var(--accent);
+  --lime: var(--aqua);
+  --lime-2: #06b6d4;
+
+  /* ---- 4. Gradients & shadow ------------------------------------------ */
+  --grad-hero: linear-gradient(120deg, var(--primary) 0%, var(--primary-2) 45%, var(--aqua) 100%);
+  --grad-aqua: linear-gradient(120deg, var(--aqua), var(--mint));
+  --grad-band: linear-gradient(110deg, var(--aqua) 0%, var(--primary) 60%, #8b5cf6 100%);
+  --shadow: 0 20px 48px -26px rgba(124, 58, 237, 0.30);
+
+  /* ---- 5. Typography -------------------------------------------------- */
+  /* Font FAMILIES are defined on `body` below (that's where next/font injects
+     --font-body / --font-display / --font-print). Sizes live here: */
+
+  /* Base size — scales the whole rem-based type system. 16px = default. */
+  --font-size-base: 16px;
+
+  /* Type scale (use as var(--text-lg) etc. where a fixed size is needed) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-hero: clamp(2rem, 5vw, 3.5rem); /* big display headline */
+
+  /* ---- 6. Radii ------------------------------------------------------- */
+  --radius-sm: 0.5rem;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 9999px;
+}
+
+/* Font FAMILIES — defined on <body> because next/font sets --font-body,
+   --font-display and --font-print there (not on :root). To change a font role,
+   re-map it here (for a fully custom font, swap the fallback stack), or change
+   the actual typeface via the next/font imports in src/app/layout.tsx. */
+body {
+  --font-sans: var(--font-body), "Inter", ui-sans-serif, system-ui, sans-serif;        /* body text */
+  --font-heading: var(--font-display), "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; /* headings */
+  --font-poster: var(--font-print), "Anton", ui-sans-serif, system-ui, sans-serif;      /* poster / display */
+}
+
+/* Apply the configurable base font size to the document root. */
+html {
+  font-size: var(--font-size-base);
+}
