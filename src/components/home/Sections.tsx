@@ -98,29 +98,27 @@ export function FlashSale() {
     { v: t.s, label: "Secs" },
   ];
   return (
-    <section id="flash-sale" className="mx-auto max-w-full px-5 pt-2 pb-2">
+    <section id="flash-sale" className="w-full pt-2 pb-2 md:px-5">
       <div
-        className="relative flex flex-wrap items-center justify-between gap-x-8 gap-y-5 overflow-hidden rounded-2xl px-5 py-4 text-white shadow-lg md:px-8"
+        className="relative flex items-center justify-between gap-3 overflow-hidden rounded-none px-4 py-3 text-white shadow-lg md:flex-wrap md:gap-x-8 md:gap-y-5 md:rounded-2xl md:px-8 md:py-4"
         style={{ background: "linear-gradient(95deg,#f2426f 0%,#f56b53 42%,#f79a3c 74%,#f9c23c 100%)" }}
       >
-        {/* Left: message */}
-        <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/20 text-white">
-            <Icon name="bolt" className="h-6 w-6" />
+        {/* Message — one line on mobile */}
+        <div className="flex min-w-0 items-center gap-2.5 md:gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/20 md:h-11 md:w-11 md:rounded-xl">
+            <Icon name="bolt" className="h-5 w-5 md:h-6 md:w-6" />
           </span>
-          <div className="leading-none">
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/85">Flash Sale</span>
-            <div className="mt-1 flex items-baseline gap-2.5">
-              <span className="font-display text-2xl font-extrabold md:text-3xl">
-                UP TO 50% OFF
-              </span>
-              <span className="font-display text-lg italic text-yellow-100">Ends Tonight!</span>
+          <div className="min-w-0 leading-none">
+            <span className="hidden text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 md:block">Flash Sale</span>
+            <div className="flex items-baseline gap-2.5 md:mt-1">
+              <span className="whitespace-nowrap font-display text-xl font-extrabold md:text-3xl">UP TO 50% OFF</span>
+              <span className="hidden font-display text-lg italic text-yellow-100 md:inline">Ends Tonight!</span>
             </div>
           </div>
         </div>
 
-        {/* Center: countdown */}
-        <div className="flex items-center gap-3">
+        {/* Countdown — desktop only */}
+        <div className="hidden items-center gap-3 md:flex">
           {units.map((u, i) => (
             <div key={u.label} className="flex items-center gap-3">
               <div className="text-center">
@@ -132,12 +130,13 @@ export function FlashSale() {
           ))}
         </div>
 
-        {/* Right: CTA */}
+        {/* CTA */}
         <Link
           href="/sale"
-          className="group inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+          className="group inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--ink)] px-4 py-2.5 text-[13px] font-bold text-white transition-transform hover:-translate-y-0.5 md:gap-2 md:px-6 md:py-3 md:text-sm"
         >
-          Shop The Sale
+          <span className="md:hidden">Shop Now</span>
+          <span className="hidden md:inline">Shop The Sale</span>
           <Icon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
