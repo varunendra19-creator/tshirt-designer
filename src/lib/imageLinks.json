@@ -1,0 +1,43 @@
+{
+  "_comment": "Real relevant stock photos (Pexels CDN) for Campus Mode. Swap any value for a local /generated/*.jpg path (or run npm run gen:images) once AI images exist. Keys are referenced from catalog.ts and homeContent.ts.",
+
+  "hero-students": "/hero-students.png",
+
+  "cat-oversized": "https://images.pexels.com/photos/3290886/pexels-photo-3290886.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "cat-printed": "https://images.pexels.com/photos/2664705/pexels-photo-2664705.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "cat-plain": "https://images.pexels.com/photos/24779116/pexels-photo-24779116.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "cat-hoodies": "https://images.pexels.com/photos/31700390/pexels-photo-31700390.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "cat-combos": "https://images.pexels.com/photos/8346226/pexels-photo-8346226.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "cat-accessories": "https://images.pexels.com/photos/19208069/pexels-photo-19208069.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "cat-new": "https://images.pexels.com/photos/16268823/pexels-photo-16268823.jpeg?auto=compress&cs=tinysrgb&w=800",
+
+  "builder-tee": "https://images.pexels.com/photos/11671964/pexels-photo-11671964.jpeg?auto=compress&cs=tinysrgb&w=1000",
+
+  "p-urban-graphic": "https://images.pexels.com/photos/14428678/pexels-photo-14428678.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-relaxed-cargo": "https://images.pexels.com/photos/18516993/pexels-photo-18516993.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-premium-hoodie": "https://images.pexels.com/photos/30095394/pexels-photo-30095394.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-campus-sneakers": "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-focus-graphic": "https://images.pexels.com/photos/17630522/pexels-photo-17630522.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-good-things": "https://images.pexels.com/photos/3769022/pexels-photo-3769022.jpeg?auto=compress&cs=tinysrgb&w=800",
+
+  "p-minimal-tee": "https://images.pexels.com/photos/24779116/pexels-photo-24779116.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-washed-hoodie": "https://images.pexels.com/photos/32430590/pexels-photo-32430590.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-oversized-shirt": "https://images.pexels.com/photos/3353290/pexels-photo-3353290.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-back-print": "https://images.pexels.com/photos/14428678/pexels-photo-14428678.jpeg?auto=compress&cs=tinysrgb&w=800",
+
+  "p-classic-white": "https://images.pexels.com/photos/11671964/pexels-photo-11671964.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-campus-cap": "https://images.pexels.com/photos/19208069/pexels-photo-19208069.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-women-tee": "https://images.pexels.com/photos/6311599/pexels-photo-6311599.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "p-street-combo": "https://images.pexels.com/photos/29608267/pexels-photo-29608267.jpeg?auto=compress&cs=tinysrgb&w=800",
+
+  "outfit-library": "https://images.pexels.com/photos/17630522/pexels-photo-17630522.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "outfit-coffee": "https://images.pexels.com/photos/6311599/pexels-photo-6311599.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "outfit-campus": "https://images.pexels.com/photos/3290886/pexels-photo-3290886.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "outfit-weekend": "https://images.pexels.com/photos/30095394/pexels-photo-30095394.jpeg?auto=compress&cs=tinysrgb&w=800",
+
+  "testi-1": "https://images.pexels.com/photos/8217536/pexels-photo-8217536.jpeg?auto=compress&cs=tinysrgb&w=300",
+  "testi-2": "https://images.pexels.com/photos/29852896/pexels-photo-29852896.jpeg?auto=compress&cs=tinysrgb&w=300",
+  "testi-3": "https://images.pexels.com/photos/2058661/pexels-photo-2058661.jpeg?auto=compress&cs=tinysrgb&w=300",
+
+  "newsletter-couple": "/newsletter.png"
+}
