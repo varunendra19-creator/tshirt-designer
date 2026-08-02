@@ -616,9 +616,9 @@ export function Testimonials() {
 /* ---- 11. Trusted colleges ---------------------------------------------- */
 export function Colleges() {
   return (
-    <section id="colleges" className="mx-auto max-w-full px-5 pt-2 pb-6">
+    <section id="colleges" className="w-full pt-2 pb-6 md:px-5">
       <div
-        className="relative overflow-hidden rounded-[1.6rem] px-5 py-8 text-white shadow-[0_18px_40px_-18px_rgba(124,58,237,0.55)]"
+        className="relative overflow-hidden px-5 py-8 text-white shadow-[0_18px_40px_-18px_rgba(124,58,237,0.55)] md:rounded-[1.6rem]"
         style={{ background: "linear-gradient(120deg,var(--primary-2) 0%,var(--primary) 55%,var(--primary) 100%)" }}
       >
         <div
@@ -628,11 +628,12 @@ export function Colleges() {
         <p className="relative text-center text-xs font-bold uppercase tracking-[0.22em] text-white/85">
           Trusted &amp; loved by students from top colleges
         </p>
-        <div className="relative mt-7 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {/* Mobile: one-line swiper. Desktop: 6-up grid. */}
+        <div className="relative mt-7 -mx-5 flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-6">
           {COLLEGES.map((c) => (
             <div
               key={c.name}
-              className="flex h-[74px] items-center justify-center rounded-2xl bg-white px-4 shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5"
+              className="flex h-[74px] w-[136px] shrink-0 snap-start items-center justify-center rounded-2xl bg-white px-4 shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-transform hover:-translate-y-0.5 md:w-auto md:shrink"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={c.logo} alt={`${c.name} logo`} className="max-h-[46px] max-w-full object-contain" />
