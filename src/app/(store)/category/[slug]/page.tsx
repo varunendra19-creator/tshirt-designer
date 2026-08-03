@@ -26,13 +26,14 @@ export function generateStaticParams() {
   return CATEGORIES.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  if (!isCategory(params.slug)) return { title: "Category not found", robots: { index: false } };
-  const db = await getDbCategory(params.slug);
-  const label = db?.label || CATEGORY_LABELS[params.slug];
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  if (!isCategory(slug)) return { title: "Category not found", robots: { index: false } };
+  const db = await getDbCategory(slug);
+  const label = db?.label || CATEGORY_LABELS[slug];
   const title = `${label} for College Students — Buy Online`;
-  const description = db?.description || DESC[params.slug];
-  const url = `/category/${params.slug}`;
+  const description = db?.description || DESC[slug];
+  const url = `/category/${slug}`;
   return {
     title,
     description,
@@ -43,9 +44,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  if (!isCategory(params.slug)) notFound();
-  const cat = params.slug;
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  if (!isCategory(slug)) notFound();
+  const cat = slug;
   const db = await getDbCategory(cat);
   const label = db?.label || CATEGORY_LABELS[cat];
   const desc = db?.description || DESC[cat];

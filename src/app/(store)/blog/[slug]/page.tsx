@@ -9,8 +9,9 @@ export function generateStaticParams() {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const post = getPost(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getPost(slug);
   if (!post) return { title: "Post not found" };
   return {
     title: post.title,
@@ -30,8 +31,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const post = getPost(params.slug);
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = getPost(slug);
   if (!post) notFound();
 
   const articleJsonLd = {

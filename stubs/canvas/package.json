@@ -1,0 +1,6 @@
+{
+  "name": "canvas",
+  "version": "0.0.0",
+  "description": "Empty stub for the optional native 'canvas' package. jsdom (pulled in by fabric's Node build target) does a guarded require('canvas') to support server-side <canvas>; this app only ever uses fabric in the browser, so the real native module is never needed and would otherwise break the Cloudflare/esbuild bundle.",
+  "main": "index.js"
+}

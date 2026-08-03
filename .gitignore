@@ -13,3 +13,13 @@ t-shirt/
 
 # heavy 3D models — unused by the current 2D customizer (kept locally, not in git)
 public/models/
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+
+!.env.example

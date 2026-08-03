@@ -15,8 +15,9 @@ export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.id }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const p = await getDbProduct(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const p = await getDbProduct(slug);
   if (!p) return { title: "Product not found", robots: { index: false } };
   const title = `${p.name} — ${CATEGORY_LABELS[p.category]}`;
   const description = stripHtml(p.description).slice(0, 300) || `Buy ${p.name} online at Campus Mode.`;
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await getDbProduct(params.slug);
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const product = await getDbProduct(slug);
   if (!product) notFound();
   const url = `${SITE}/products/${product.id}`;
 
