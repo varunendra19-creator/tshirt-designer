@@ -11,6 +11,7 @@ interface RightSidebarProps {
   activeObject: any;
   objProps: ObjectProperties | null;
   onUpdateProp: (key: keyof ObjectProperties, value: number) => void;
+  onScale: (percent: number) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   onCenterH: () => void;
@@ -59,7 +60,7 @@ function PropInput({
 
 export function RightSidebar({
   activeObject, objProps,
-  onUpdateProp, onDelete, onDuplicate,
+  onUpdateProp, onScale, onDelete, onDuplicate,
   onCenterH, onCenterV,
   onBringToFront, onSendToBack, onBringForward, onSendBackward,
 }: RightSidebarProps) {
@@ -139,6 +140,28 @@ export function RightSidebar({
           {/* Size */}
           <div>
             {sectionTitle("Size")}
+            {/* Uniform scale first — it is what people actually reach for. The W/H
+                boxes below stay for exact print dimensions. */}
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="range" min="10" max="300" step="5" defaultValue={100}
+                onChange={e => onScale(Number(e.target.value))}
+                className="flex-1 accent-violet-500"
+              />
+              <span className="text-[10px] w-8 text-right" style={{ color: "rgba(255,255,255,0.4)" }}>scale</span>
+            </div>
+            <div className="flex gap-2 mb-2">
+              {[50, 100, 150, 200].map(p => (
+                <button
+                  key={p}
+                  onClick={() => onScale(p)}
+                  className="flex-1 h-7 rounded-lg text-[10px] transition-all"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "0.5px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.55)" }}
+                >
+                  {p}%
+                </button>
+              ))}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <PropInput label="W" value={objProps.width} onChange={v => onUpdateProp("width", v)} min={1} />
               <PropInput label="H" value={objProps.height} onChange={v => onUpdateProp("height", v)} min={1} />

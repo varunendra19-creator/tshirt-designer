@@ -4,3 +4,12 @@ node_modules/
 .env.local
 *.log
 .DS_Store
+
+# stray nested project (its own git repo) — not part of this app
+t-shirt/
+
+# build artifacts
+*.tsbuildinfo
+
+# heavy 3D models — unused by the current 2D customizer (kept locally, not in git)
+public/models/

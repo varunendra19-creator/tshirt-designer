@@ -26,6 +26,10 @@ interface LeftSidebarProps {
   onShirtScale: (v: number) => void; onShirtReset: () => void;
   // Custom color
   customColor: string; onCustomColor: (c: string) => void;
+  // Applies a style patch to the currently selected design object; returns whether
+  // anything was selected to apply it to.
+  onStyleText: (patch: Record<string, any>) => boolean;
+  hasSelection: boolean;
 }
 
 const TABS = [
@@ -80,7 +84,7 @@ export function LeftSidebar({
   onAddImage, onAddText, onAddTemplate, onClearTemplates,
   shirtRotation, shirtFlipX, shirtFlipY, shirtScale,
   onShirtRotation, onShirtFlipX, onShirtFlipY, onShirtScale, onShirtReset,
-  customColor, onCustomColor,
+  customColor, onCustomColor, onStyleText, hasSelection,
 }: LeftSidebarProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>("products");
   const [garmentModalOpen, setGarmentModalOpen] = useState(false);
@@ -337,9 +341,14 @@ export function LeftSidebar({
             {/* Style controls */}
             <div className="mt-3 pt-3" style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}>
               <SectionLabel label="Text Style"/>
+              <p className="text-[10px] mb-2.5" style={{ color: hasSelection ? "rgba(167,139,250,0.85)" : "rgba(255,255,255,0.3)" }}>
+                {hasSelection
+                  ? "Editing the selected design"
+                  : "Select a design on the shirt to restyle it, or set defaults for the next one"}
+              </p>
               <div className="mb-3">
                 <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Font</label>
-                <select value={fontFamily} onChange={e=>setFontFamily(e.target.value)} className="w-full rounded-lg px-3 py-2 text-sm"
+                <select value={fontFamily} onChange={e=>{ setFontFamily(e.target.value); onStyleText({ fontFamily: e.target.value }); }} className="w-full rounded-lg px-3 py-2 text-sm"
                   style={{ background:"rgba(255,255,255,0.06)", border:"0.5px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.8)", outline:"none" }}>
                   {FONTS.map(f => <option key={f} value={f} style={{ background:"#1a1a2e" }}>{f}</option>)}
                 </select>
@@ -347,17 +356,34 @@ export function LeftSidebar({
               <div className="mb-3">
                 <label className="text-[10px] uppercase tracking-widest mb-1.5 block" style={{ color:"rgba(255,255,255,0.35)" }}>Color</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={textColor} onChange={e=>setTextColor(e.target.value)} className="w-10 h-8 rounded cursor-pointer" style={{ border:"none" }}/>
+                  <input type="color" value={textColor} onChange={e=>{ setTextColor(e.target.value); onStyleText({ fill: e.target.value }); }} className="w-10 h-8 rounded cursor-pointer" style={{ border:"none" }}/>
                   <span className="text-xs font-mono" style={{ color:"rgba(255,255,255,0.5)" }}>{textColor}</span>
                 </div>
               </div>
               <div className="flex gap-1.5 flex-wrap">
-                {[{icon:Bold,k:"b",a:bold,t:()=>setBold(!bold)},{icon:Italic,k:"i",a:italic,t:()=>setItalic(!italic)},{icon:Underline,k:"u",a:underline,t:()=>setUnderline(!underline)}].map(({icon:Icon,k,a,t})=>(
+                {[
+                  {icon:Bold,      k:"b", a:bold,      t:()=>{ const v=!bold;      setBold(v);      onStyleText({ fontWeight: v ? "bold" : "normal" }); }},
+                  {icon:Italic,    k:"i", a:italic,    t:()=>{ const v=!italic;    setItalic(v);    onStyleText({ fontStyle: v ? "italic" : "normal" }); }},
+                  {icon:Underline, k:"u", a:underline, t:()=>{ const v=!underline; setUnderline(v); onStyleText({ underline: v }); }},
+                ].map(({icon:Icon,k,a,t})=>(
                   <button key={k} onClick={t} className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
                     style={{ background:a?"rgba(124,58,237,0.25)":"rgba(255,255,255,0.06)", border:a?"0.5px solid rgba(124,58,237,0.6)":"0.5px solid rgba(255,255,255,0.1)", color:a?"#a78bfa":"rgba(255,255,255,0.5)" }}>
                     <Icon size={14}/>
                   </button>
                 ))}
+                {[
+                  {icon:AlignLeft,   k:"l", v:"left"   as const},
+                  {icon:AlignCenter, k:"c", v:"center" as const},
+                  {icon:AlignRight,  k:"r", v:"right"  as const},
+                ].map(({icon:Icon,k,v})=>{
+                  const a = textAlign===v;
+                  return (
+                    <button key={k} onClick={()=>{ setTextAlign(v); onStyleText({ textAlign: v }); }} className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
+                      style={{ background:a?"rgba(124,58,237,0.25)":"rgba(255,255,255,0.06)", border:a?"0.5px solid rgba(124,58,237,0.6)":"0.5px solid rgba(255,255,255,0.1)", color:a?"#a78bfa":"rgba(255,255,255,0.5)" }}>
+                      <Icon size={14}/>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
